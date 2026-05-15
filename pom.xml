@@ -9,7 +9,7 @@
     <version>2.7.x.20260516-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Dreamina (即梦) official CLI integration SDK for Java</description>
+    <description>Dreamina (即梦) official CLI integration SDK for Java — main development line (JDK 17)</description>
     <url>https://github.com/hiwepy/${project.artifactId}</url>
 
     <licenses>
@@ -145,7 +145,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>${maven-release-plugin.version}</version>
                     <configuration>
-                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <tagNameFormat>v@${project.version}</tagNameFormat>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <useReleaseProfile>false</useReleaseProfile>
                         <releaseProfiles>release</releaseProfiles>
@@ -319,6 +319,7 @@
         </profile>
     </profiles>
 
+
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -354,4 +355,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 </project>
