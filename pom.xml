@@ -6,7 +6,7 @@
 
     <groupId>io.github.hiwepy</groupId>
     <artifactId>dreamina-java-sdk</artifactId>
-    <version>1.0.x.20260515-SNAPSHOT</version>
+    <version>1.0.x.20260516-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Dreamina (即梦) official CLI integration SDK for Java</description>
@@ -36,14 +36,6 @@
             <timezone>+8</timezone>
         </developer>
     </developers>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>central-snapshots</id>
-            <name>Central Portal Snapshots</name>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <properties>
         <java.version>17</java.version>
