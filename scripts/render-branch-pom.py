@@ -825,16 +825,32 @@ def write_full_j17_main(version: str) -> None:
     POM.write_text(body, encoding="utf-8")
 
 
+def write_feature_j8_27(version: str) -> None:
+    """feature 分支：保持 1.0.x 版本线，但构建基线按 2.7.x / JDK 8 对齐。"""
+    write_full_j8_27(version)
+    text = POM.read_text(encoding="utf-8")
+    text = text.replace(
+        "Dreamina (即梦) official CLI integration SDK for Java — Spring Boot 2.7.x line (JDK 8)",
+        "Dreamina (即梦) official CLI integration SDK for Java — feature/v1.0.0 baseline / Spring Boot 2.7.x line (JDK 8)",
+        1,
+    )
+    POM.write_text(text, encoding="utf-8")
+
+
+def write_main_j17(version: str) -> None:
+    """主分支：按 openclaw 当前 main 策略保持 3.3.x / JDK 17。"""
+    write_slim_j17(version, "2.0.16", "main / Spring Boot 3.3.x baseline (JDK 17)")
+
 SNAPSHOT_SUFFIX = "20260516-SNAPSHOT"
 
 
 def render(branch: str) -> None:
     snapshot = SNAPSHOT_SUFFIX
     if branch == "main":
-        write_full_j17_main(f"1.0.x.{snapshot}")
+        write_main_j17(f"3.3.x.{snapshot}")
         return
     if branch == "feature/v1.0.0":
-        write_slim_j17(f"3.3.x.{snapshot}", "2.0.16", "features / Spring Boot 3.3.x baseline (JDK 17)")
+        write_feature_j8_27(f"1.0.x.{snapshot}")
         return
     if branch == "2.3.x":
         write_minimal_j8(f"2.3.x.{snapshot}")
