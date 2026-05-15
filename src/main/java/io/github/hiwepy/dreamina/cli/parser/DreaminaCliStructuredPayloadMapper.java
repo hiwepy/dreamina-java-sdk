@@ -13,9 +13,13 @@ import io.github.hiwepy.dreamina.cli.DreaminaSessionSearchResult;
 import io.github.hiwepy.dreamina.cli.DreaminaTaskListResult;
 import io.github.hiwepy.dreamina.cli.DreaminaUserCreditResult;
 import io.github.hiwepy.dreamina.cli.DreaminaVersionResult;
+import io.github.hiwepy.dreamina.util.DreaminaStrings;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -352,7 +356,9 @@ public final class DreaminaCliStructuredPayloadMapper {
     private List<DreaminaSessionRow> parseSessionRows(String combined, TableKind kind) {
         List<DreaminaSessionRow> rows = new ArrayList<>();
         boolean seenHeader = false;
-        for (String line : combined.lines().toList()) {
+        try (BufferedReader br = new BufferedReader(new StringReader(combined))) {
+            String line;
+            while ((line = br.readLine()) != null) {
             String t = line.trim();
             if (t.isEmpty()) {
                 continue;
@@ -379,6 +385,9 @@ public final class DreaminaCliStructuredPayloadMapper {
             if (row != null) {
                 rows.add(row);
             }
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("unexpected IO while parsing session rows", e);
         }
         return rows;
     }
@@ -440,7 +449,7 @@ public final class DreaminaCliStructuredPayloadMapper {
     }
 
     private JsonNode tryParseSingle(String payload) {
-        if (payload == null || payload.isBlank()) {
+        if (DreaminaStrings.isBlank(payload)) {
             return null;
         }
         String trimmed = payload.trim();
@@ -530,10 +539,10 @@ public final class DreaminaCliStructuredPayloadMapper {
     }
 
     private static String firstNonBlank(String a, String b) {
-        if (a != null && !a.isBlank()) {
+        if (DreaminaStrings.isNotBlank(a)) {
             return a;
         }
-        if (b != null && !b.isBlank()) {
+        if (DreaminaStrings.isNotBlank(b)) {
             return b;
         }
         return null;
@@ -543,7 +552,7 @@ public final class DreaminaCliStructuredPayloadMapper {
      * 启发式检测「复用现有 OAuth」语义（中英兜底）。
      */
     private static Boolean detectOAuthReuse(String combined) {
-        if (combined == null || combined.isBlank()) {
+        if (DreaminaStrings.isBlank(combined)) {
             return null;
         }
         String lower = combined.toLowerCase(Locale.ROOT);

@@ -1,5 +1,6 @@
 package io.github.hiwepy.dreamina.cli;
 
+import io.github.hiwepy.dreamina.util.DreaminaStrings;
 import io.github.hiwepy.dreamina.DreaminaCliProperties;
 import io.github.hiwepy.dreamina.cli.DreaminaCliSubcommands;
 import io.github.hiwepy.dreamina.exception.DreaminaCliExecutableFailureException;
@@ -168,7 +169,7 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult help(String subcommand, List<String> additionalRawArgs) {
         Objects.requireNonNull(subcommand, "subcommand");
-        if (subcommand.isBlank()) {
+        if (DreaminaStrings.isBlank(subcommand)) {
             throw new IllegalArgumentException("subcommand must not be blank");
         }
         CommandLine cmd = newSubcommandChain(DreaminaCliSubcommands.Builtin.HELP, subcommand.trim());
@@ -264,7 +265,7 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult checkLogin(String deviceCode, int pollSeconds, List<String> additionalRawArgs) {
         Objects.requireNonNull(deviceCode, "deviceCode");
-        if (deviceCode.isBlank()) {
+        if (DreaminaStrings.isBlank(deviceCode)) {
             throw new IllegalArgumentException("deviceCode must not be blank");
         }
         if (pollSeconds < 0) {
@@ -404,7 +405,7 @@ public class DreaminaCliExecutor {
     public DreaminaCliResult sessionRename(String sessionId, String newName, List<String> additionalRawArgs) {
         Objects.requireNonNull(sessionId, "sessionId");
         Objects.requireNonNull(newName, "newName");
-        if (sessionId.isBlank() || newName.isBlank()) {
+        if (DreaminaStrings.isBlank(sessionId) || DreaminaStrings.isBlank(newName)) {
             throw new IllegalArgumentException("sessionId and newName must not be blank");
         }
         return runSessionSub(
@@ -426,7 +427,7 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult sessionDelete(String sessionId, List<String> additionalRawArgs) {
         Objects.requireNonNull(sessionId, "sessionId");
-        if (sessionId.isBlank()) {
+        if (DreaminaStrings.isBlank(sessionId)) {
             throw new IllegalArgumentException("sessionId must not be blank");
         }
         return runSessionSub(DreaminaCliSubcommands.SessionSub.DELETE, sessionId.trim(), null, additionalRawArgs);
@@ -442,10 +443,10 @@ public class DreaminaCliExecutor {
         List<String> additionalRawArgs) {
         Objects.requireNonNull(verb, "verb");
         CommandLine cmd = newSubcommandChain(DreaminaCliSubcommands.Account.SESSION, verb);
-        if (firstPositional != null && !firstPositional.isBlank()) {
+        if (DreaminaStrings.isNotBlank(firstPositional)) {
             cmd.addArgument(firstPositional.trim(), true);
         }
-        if (secondPositional != null && !secondPositional.isBlank()) {
+        if (DreaminaStrings.isNotBlank(secondPositional)) {
             cmd.addArgument(secondPositional.trim(), true);
         }
         appendCleanArgs(cmd, additionalRawArgs);
@@ -604,7 +605,7 @@ public class DreaminaCliExecutor {
         Objects.requireNonNull(imagePath, "imagePath");
         CommandLine cmd = newSubcommand(DreaminaCliSubcommands.Video.IMAGE2VIDEO);
         appendQuotedKv(cmd, "--image", imagePath);
-        if (prompt != null && !prompt.isBlank()) {
+        if (DreaminaStrings.isNotBlank(prompt)) {
             appendQuotedKv(cmd, "--prompt", prompt);
         }
         appendCleanArgs(cmd, additionalRawArgs);
@@ -1136,7 +1137,7 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult invoke(String subcommand, List<String> additionalRawArgs) {
         Objects.requireNonNull(subcommand, "subcommand");
-        if (subcommand.isBlank()) {
+        if (DreaminaStrings.isBlank(subcommand)) {
             throw new IllegalArgumentException("subcommand must not be blank");
         }
         CommandLine cmd = newSubcommand(subcommand.trim());
@@ -1170,7 +1171,7 @@ public class DreaminaCliExecutor {
         }
         CommandLine cmd = baseCommandLine();
         for (String token : subcommandTokens) {
-            if (token == null || token.isBlank()) {
+            if (DreaminaStrings.isBlank(token)) {
                 throw new IllegalArgumentException("subcommand token must not be null/blank");
             }
             cmd.addArgument(token.trim());
@@ -1260,8 +1261,8 @@ public class DreaminaCliExecutor {
             throw new DreaminaCliException("Interrupted while awaiting Dreamina CLI subprocess", e, null);
         }
 
-        String stdoutStr = out.toString(StandardCharsets.UTF_8);
-        String stderrStr = err.toString(StandardCharsets.UTF_8);
+        String stdoutStr = new String(out.toByteArray(), StandardCharsets.UTF_8);
+        String stderrStr = new String(err.toByteArray(), StandardCharsets.UTF_8);
         DreaminaParsedFields parsed = DreaminaCliOutputParser.parseBestEffort(stdoutStr, stderrStr);
 
         // --- 超时：Watchdog 结束进程，优先抛出超时异常 ---
@@ -1273,7 +1274,8 @@ public class DreaminaCliExecutor {
 
         // --- ExecuteException：通常对应非零退出或进程被破坏 ---
         Exception asyncFailure = handler.getException();
-        if (asyncFailure instanceof ExecuteException ex) {
+        if (asyncFailure instanceof ExecuteException) {
+            ExecuteException ex = (ExecuteException) asyncFailure;
             DreaminaCliResult failed = snapshot(stdoutStr, stderrStr, normalizeExitValue(ex.getExitValue()), parsed);
             throw new DreaminaCliNonZeroExitException(
                 "Dreamina CLI failed (exitCode=" + ex.getExitValue() + "): " + commandLine, failed);
