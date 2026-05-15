@@ -1,7 +1,9 @@
 package io.github.hiwepy.dreamina.cli.opts;
 
+import io.github.hiwepy.dreamina.util.DreaminaStrings;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +27,7 @@ public final class DreaminaCliRequestSupport {
      * @return 去除首尾空白后的值
      */
     public static String requireNonBlank(String value, String label) {
-        if (value == null || value.isBlank()) {
+        if (DreaminaStrings.isBlank(value)) {
             throw new IllegalArgumentException(label + " must not be blank");
         }
         return value.trim();
@@ -86,7 +88,7 @@ public final class DreaminaCliRequestSupport {
      */
     public static String requireReadableFile(String rawPath, String label) {
         String path = requireNonBlank(rawPath, label);
-        Path resolved = Path.of(path);
+        Path resolved = Paths.get(path);
         if (!Files.exists(resolved)) {
             throw new IllegalArgumentException(label + " does not exist: " + path);
         }
@@ -140,7 +142,7 @@ public final class DreaminaCliRequestSupport {
      * @param value 参数值
      */
     public static void addFlag(List<String> args, String key, String value) {
-        if (value == null || value.isBlank()) {
+        if (DreaminaStrings.isBlank(value)) {
             return;
         }
         args.add(key + "=" + value.trim());
@@ -185,7 +187,7 @@ public final class DreaminaCliRequestSupport {
             return;
         }
         for (String arg : additionalRawArgs) {
-            if (arg != null && !arg.isBlank()) {
+            if (DreaminaStrings.isNotBlank(arg)) {
                 args.add(arg.trim());
             }
         }
