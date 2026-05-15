@@ -34,8 +34,12 @@ import io.github.hiwepy.dreamina.cli.DreaminaVersionResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import io.github.hiwepy.dreamina.util.DreaminaStrings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +86,7 @@ public final class DreaminaCliLocalSmokeMain {
     public static void main(String[] args) throws Exception {
         DreaminaCliProperties props = new DreaminaCliProperties();
         String exe = System.getenv("DREAMINA_CLI_EXECUTABLE");
-        if (exe != null && !exe.isBlank()) {
+        if (DreaminaStrings.isNotBlank(exe)) {
             props.setExecutable(exe.trim());
         }
         props.setCommandTimeoutMillis(240_000L);
@@ -147,7 +151,7 @@ public final class DreaminaCliLocalSmokeMain {
         runStep(report, "sessionCreateInfo", () -> {
             String stamp = Long.toString(System.currentTimeMillis());
             DreaminaCliTypedResult<DreaminaSessionMutationResult> t =
-                executor.sessionCreateInfo(List.of("cli-java-smoke-" + stamp));
+                executor.sessionCreateInfo(Collections.singletonList("cli-java-smoke-" + stamp));
             printTyped("sessionCreateInfo", t.getRaw(), t.getStructured());
             createdIdHolder[0] = t.getStructured().getSessionId();
             if (createdIdHolder[0] == null) {
@@ -179,7 +183,7 @@ public final class DreaminaCliLocalSmokeMain {
         // --- 生成提交：最低参数（仍会消耗积分；失败区分平台并发等） ---
         runStep(report, "text2ImageSubmit", () -> {
             DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
-                executor.text2ImageSubmit("smoke", List.of(
+                executor.text2ImageSubmit("smoke", Arrays.asList(
                     "--model_version=3.0",
                     "--resolution_type=1k",
                     "--ratio=1:1",
@@ -189,7 +193,7 @@ public final class DreaminaCliLocalSmokeMain {
         });
         runStep(report, "image2ImageSubmit", () -> {
             DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
-                executor.image2ImageSubmit(tinyPath, "smoke", List.of(
+                executor.image2ImageSubmit(tinyPath, "smoke", Arrays.asList(
                     "--resolution_type=2k",
                     "--ratio=1:1",
                     "--poll=0"));
@@ -197,7 +201,7 @@ public final class DreaminaCliLocalSmokeMain {
             rememberSubmit(submitIds, t.getStructured());
         });
         runStep(report, "imageUpscaleSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.imageUpscaleSubmit(List.of(
+            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.imageUpscaleSubmit(Arrays.asList(
                 "--image=" + tinyPath,
                 "--resolution_type=2k",
                 "--poll=0"));
@@ -206,7 +210,7 @@ public final class DreaminaCliLocalSmokeMain {
         });
         runStep(report, "text2VideoSubmit", () -> {
             DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
-                executor.text2VideoSubmit("smoke", List.of(
+                executor.text2VideoSubmit("smoke", Arrays.asList(
                     "--duration=4",
                     "--video_resolution=720p",
                     "--ratio=1:1",
@@ -216,7 +220,7 @@ public final class DreaminaCliLocalSmokeMain {
         });
         runStep(report, "image2VideoSubmit", () -> {
             DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
-                executor.image2VideoSubmit(tinyPath, "smoke", List.of(
+                executor.image2VideoSubmit(tinyPath, "smoke", Arrays.asList(
                     "--duration=4",
                     "--video_resolution=720p",
                     "--poll=0"));
@@ -224,7 +228,7 @@ public final class DreaminaCliLocalSmokeMain {
             rememberSubmit(submitIds, t.getStructured());
         });
         runStep(report, "frames2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.frames2VideoSubmit(List.of(
+            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.frames2VideoSubmit(Arrays.asList(
                 "--first=" + tinyPath,
                 "--last=" + tinyPath,
                 "--prompt=smoke",
@@ -236,7 +240,7 @@ public final class DreaminaCliLocalSmokeMain {
             rememberSubmit(submitIds, t.getStructured());
         });
         runStep(report, "multiframe2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multiframe2VideoSubmit(List.of(
+            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multiframe2VideoSubmit(Arrays.asList(
                 "--images=" + tinyPath + "," + tinyPath,
                 "--prompt=smoke",
                 "--duration=3",
@@ -245,7 +249,7 @@ public final class DreaminaCliLocalSmokeMain {
             rememberSubmit(submitIds, t.getStructured());
         });
         runStep(report, "multimodal2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multimodal2VideoSubmit(List.of(
+            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multimodal2VideoSubmit(Arrays.asList(
                 "--image=" + tinyPath,
                 "--prompt=smoke",
                 "--duration=4",
@@ -279,7 +283,7 @@ public final class DreaminaCliLocalSmokeMain {
      * 记录 submitId（若结构化字段缺失则跳过）。
      */
     private static void rememberSubmit(List<String> sink, DreaminaGenerateSubmitResult dto) {
-        if (dto != null && dto.getSubmitId() != null && !dto.getSubmitId().isBlank()) {
+        if (dto != null && DreaminaStrings.isNotBlank(dto.getSubmitId())) {
             sink.add(dto.getSubmitId());
         }
     }
@@ -323,7 +327,7 @@ public final class DreaminaCliLocalSmokeMain {
         System.out.println("\n--- " + label + " --- success=" + raw.isSuccess() + " exit=" + raw.getExitCode());
         System.out.println("structured: " + formatStructuredPreview(structuredPreview));
         System.out.println("stdout.head=" + abbreviate(raw.getStdout(), 280));
-        if (raw.getStderr() != null && !raw.getStderr().isBlank()) {
+        if (DreaminaStrings.isNotBlank(raw.getStderr())) {
             System.out.println("stderr.head=" + abbreviate(raw.getStderr(), 280));
         }
     }
@@ -335,16 +339,20 @@ public final class DreaminaCliLocalSmokeMain {
         if (preview == null) {
             return "null";
         }
-        if (preview instanceof String s) {
+        if (preview instanceof String) {
+            String s = (String) preview;
             return s;
         }
-        if (preview instanceof DreaminaVersionResult v) {
+        if (preview instanceof DreaminaVersionResult) {
+            DreaminaVersionResult v = (DreaminaVersionResult) preview;
             return "version=" + v.getVersion() + " commit=" + v.getCommit() + " buildTime=" + v.getBuildTime();
         }
-        if (preview instanceof DreaminaUserCreditResult c) {
+        if (preview instanceof DreaminaUserCreditResult) {
+            DreaminaUserCreditResult c = (DreaminaUserCreditResult) preview;
             return "totalCredit=" + c.getTotalCredit() + " userId=" + c.getUserId() + " vip=" + c.getVipLevel();
         }
-        if (preview instanceof DreaminaSessionMutationResult m) {
+        if (preview instanceof DreaminaSessionMutationResult) {
+            DreaminaSessionMutationResult m = (DreaminaSessionMutationResult) preview;
             return "kind=" + m.getKind() + " id=" + m.getSessionId() + " name=" + m.getSessionName();
         }
         return preview.toString();
@@ -359,7 +367,7 @@ public final class DreaminaCliLocalSmokeMain {
      * 在模块 {@code target/dreamina-smoke} 下落地极小 PNG。
      */
     private static Path prepareTinyPng() throws IOException {
-        Path dir = Path.of("target", "dreamina-smoke");
+        Path dir = Paths.get("target", "dreamina-smoke");
         Files.createDirectories(dir);
         Path png = dir.resolve("tiny.png");
         if (!Files.exists(png) || Files.size(png) == 0) {
