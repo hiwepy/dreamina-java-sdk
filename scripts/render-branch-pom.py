@@ -6,11 +6,44 @@
 """
 from __future__ import annotations
 
+import os
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 POM = ROOT / "pom.xml"
+
+ALIYUN_DM = """
+    <distributionManagement>
+        <repository>
+            <id>2624322-release-6F6h6R</id>
+            <url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-release-6f6h6r</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <snapshotRepository>
+            <id>2624322-snapshot-3EoOv3</id>
+            <url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-snapshot-3eoov3</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+"""
+
+_ANY_DM = re.compile(
+    r"\s*<distributionManagement>.*?</distributionManagement>",
+    re.DOTALL,
+)
 
 COMMON_META = """    <licenses>
         <license>
@@ -191,6 +224,11 @@ def write_minimal_j8(version: str) -> None:
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${{maven-surefire-plugin.version}}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>
@@ -841,30 +879,42 @@ def write_main_j17(version: str) -> None:
     """主分支：按 openclaw 当前 main 策略保持 3.3.x / JDK 17。"""
     write_slim_j17(version, "2.0.16", "main / Spring Boot 3.3.x baseline (JDK 17)")
 
-SNAPSHOT_SUFFIX = "20260516-SNAPSHOT"
+
+SNAPSHOT_SUFFIX = f"{os.environ.get('RELEASE_DATE', '20260516')}-SNAPSHOT"
+
+
+def apply_aliyun_distribution_management() -> None:
+    """写入/替换为阿里云 Packages distributionManagement。"""
+    text = POM.read_text(encoding="utf-8")
+    stripped = _ANY_DM.sub("", text)
+    marker = "</developers>"
+    if marker not in stripped:
+        raise SystemExit("pom.xml: </developers> not found, cannot inject distributionManagement")
+    pos = stripped.find(marker) + len(marker)
+    POM.write_text(stripped[:pos] + "\n" + ALIYUN_DM + "\n" + stripped[pos:], encoding="utf-8")
 
 
 def render(branch: str) -> None:
     snapshot = SNAPSHOT_SUFFIX
     if branch == "main":
         write_main_j17(f"3.3.x.{snapshot}")
-        return
-    if branch == "feature/v1.0.0":
+    elif branch == "feature/v1.0.0":
         write_feature_j8_27(f"1.0.x.{snapshot}")
-        return
-    if branch == "2.3.x":
+    elif branch == "2.3.x":
         write_minimal_j8(f"2.3.x.{snapshot}")
-        return
-    if branch == "2.7.x":
+    elif branch == "2.7.x":
         write_full_j8_27(f"2.7.x.{snapshot}")
-        return
-    if branch in {"3.0.x", "3.1.x", "3.2.x", "3.3.x", "3.4.x"}:
+    elif branch in {"3.0.x", "3.1.x", "3.2.x", "3.3.x", "3.4.x"}:
         write_slim_j17(f"{branch}.{snapshot}", "1.7.36", f"Spring Boot {branch[:-4]} line (JDK 17)")
-        return
-    if branch in {"3.5.x", "4.0.x"}:
-        write_slim_j17(f"{branch}.{snapshot}", "2.0.16", f"Spring Boot {branch[:-4]} line (JDK 17, SLF4J 2.x)")
-        return
-    raise SystemExit(f"unsupported branch: {branch}")
+    elif branch in {"3.5.x", "4.0.x"}:
+        write_slim_j17(
+            f"{branch}.{snapshot}",
+            "2.0.16",
+            f"Spring Boot {branch[:-4]} line (JDK 17, SLF4J 2.x)",
+        )
+    else:
+        raise SystemExit(f"unsupported branch: {branch}")
+    apply_aliyun_distribution_management()
 
 
 if __name__ == "__main__":
