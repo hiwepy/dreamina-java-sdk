@@ -9,7 +9,7 @@
     <version>4.0.x.20260516-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Dreamina (即梦) official CLI integration SDK for Java — Spring Boot 4.0.x line (JDK 17)</description>
+    <description>Dreamina (即梦) official CLI integration SDK for Java — Spring Boot 4 line (JDK 17, SLF4J 2.x)</description>
     <url>https://github.com/hiwepy/${project.artifactId}</url>
 
     <licenses>
@@ -36,6 +36,32 @@
             <timezone>+8</timezone>
         </developer>
     </developers>
+
+    <distributionManagement>
+        <repository>
+            <id>2624322-release-6F6h6R</id>
+            <url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-release-6f6h6r</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <snapshotRepository>
+            <id>2624322-snapshot-3EoOv3</id>
+            <url>https://packages.aliyun.com/6927b116e6c3e0425dbdf60d/maven/2624322-snapshot-3eoov3</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
+
 
     <properties>
         <java.version>17</java.version>
