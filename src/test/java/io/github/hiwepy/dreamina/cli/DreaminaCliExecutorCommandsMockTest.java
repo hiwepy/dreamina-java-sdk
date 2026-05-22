@@ -100,9 +100,21 @@ class DreaminaCliExecutorCommandsMockTest {
         assertTrue(executor.sessionListInfo(List.of("-n=5")).getStructured().getRows().size() >= 1);
     }
 
+    @Test void sessionListAliasCommand() throws Exception {
+        assertTrue(executor.sessionLs(List.of("-n=100")).isSuccess());
+        assertTrue(mockCli.lastInvocation().startsWith("session ls"));
+        assertTrue(executor.sessionLsInfo(List.of("-n=100")).getStructured().getRows().size() >= 1);
+    }
+
     @Test void sessionSearchCommand() throws Exception {
         assertTrue(executor.sessionSearch("mock", List.of()).isSuccess());
         assertEquals(1, executor.sessionSearchInfo("mock").getStructured().getMatches().size());
+    }
+
+    @Test void sessionFindAliasCommand() throws Exception {
+        assertTrue(executor.sessionFind("mock", List.of()).isSuccess());
+        assertTrue(mockCli.lastInvocation().startsWith("session find"));
+        assertEquals(1, executor.sessionFindInfo("mock", List.of()).getStructured().getMatches().size());
     }
 
     @Test void sessionRenameCommand() throws Exception {
@@ -110,8 +122,20 @@ class DreaminaCliExecutorCommandsMockTest {
         assertEquals("mock-renamed", executor.sessionRenameInfo("10001", "new-name").getStructured().getSessionName());
     }
 
+    @Test void sessionUpdateAliasCommand() throws Exception {
+        assertTrue(executor.sessionUpdate("10001", "new-name").isSuccess());
+        assertTrue(mockCli.lastInvocation().startsWith("session update"));
+        assertEquals("mock-renamed", executor.sessionUpdateInfo("10001", "new-name", List.of())
+            .getStructured().getSessionName());
+    }
+
     @Test void sessionDeleteCommand() throws Exception {
         assertTrue(executor.sessionDelete("10001").isSuccess());
+    }
+
+    @Test void sessionRmAliasCommand() throws Exception {
+        assertTrue(executor.sessionRm("10001").isSuccess());
+        assertTrue(mockCli.lastInvocation().startsWith("session rm"));
     }
 
     @Test void listTaskCommand() throws Exception {
