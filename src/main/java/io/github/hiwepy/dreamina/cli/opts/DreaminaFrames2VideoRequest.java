@@ -49,6 +49,11 @@ public class DreaminaFrames2VideoRequest implements DreaminaCliArgumentProvider 
     private final DreaminaVideoResolutionType videoResolution = DreaminaVideoResolutionType.RESOLUTION_720P;
 
     /**
+     * 会话 ID。
+     */
+    private final Long sessionId;
+
+    /**
      * poll 秒数。
      */
     private final Integer pollSeconds;
@@ -67,10 +72,12 @@ public class DreaminaFrames2VideoRequest implements DreaminaCliArgumentProvider 
         DreaminaCliRequestSupport.addFlag(
             args, "--last", DreaminaCliRequestSupport.requireReadableFile(lastImagePath, "lastImagePath"));
         DreaminaCliRequestSupport.addFlag(args, "--prompt", prompt);
-        DreaminaCliRequestSupport.requireRange(durationSeconds, 4, 15, "durationSeconds");
+        DreaminaCliRequestSupport.requireVideoDuration(durationSeconds, modelVersion, "durationSeconds");
         DreaminaCliRequestSupport.addFlag(args, "--duration", durationSeconds);
         DreaminaCliRequestSupport.addFlag(args, "--model_version", modelVersion == null ? null : modelVersion.getCliValue());
         DreaminaCliRequestSupport.addFlag(args, "--video_resolution", videoResolution == null ? null : videoResolution.getCliValue());
+        DreaminaCliRequestSupport.requireSessionId(sessionId);
+        DreaminaCliRequestSupport.addFlag(args, "--session", sessionId);
         DreaminaCliRequestSupport.requireNonNegative(pollSeconds, "pollSeconds");
         DreaminaCliRequestSupport.addFlag(args, "--poll", pollSeconds);
         DreaminaCliRequestSupport.addAdditionalArgs(args, additionalRawArgs);
