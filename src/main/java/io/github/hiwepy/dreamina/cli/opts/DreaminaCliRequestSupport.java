@@ -134,6 +134,45 @@ public final class DreaminaCliRequestSupport {
         return String.join(",", paths);
     }
 
+
+    /**
+     * 校验浮点数值范围。
+     */
+    public static void requireDoubleRange(Double value, double min, double max, String label) {
+        if (value == null) {
+            return;
+        }
+        if (value < min || value > max) {
+            throw new IllegalArgumentException(label + " must be in range [" + min + ", " + max + "]");
+        }
+    }
+
+    /**
+     * 按模型版本校验视频时长（秒）。
+     */
+    public static void requireVideoDuration(Integer durationSeconds, DreaminaVideoModelVersion modelVersion, String label) {
+        if (durationSeconds == null) {
+            return;
+        }
+        if (modelVersion == null) {
+            requireRange(durationSeconds, 3, 15, label);
+            return;
+        }
+        requireRange(durationSeconds, modelVersion.minDurationSeconds(), modelVersion.maxDurationSeconds(), label);
+    }
+
+    /**
+     * 重复追加同名 flag（适配 CLI stringArray）。
+     */
+    public static void addRepeatedFlag(List<String> args, String key, List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return;
+        }
+        for (String value : values) {
+            addFlag(args, key, value);
+        }
+    }
+
     /**
      * 追加 `--key=value` 形式参数。
      *
@@ -182,6 +221,16 @@ public final class DreaminaCliRequestSupport {
      * @param args             目标参数集合
      * @param additionalRawArgs 原生参数
      */
+    /**
+     * 追加浮点型 flag。
+     */
+    public static void addFlag(List<String> args, String key, Double value) {
+        if (value == null) {
+            return;
+        }
+        args.add(key + "=" + value);
+    }
+
     public static void addAdditionalArgs(List<String> args, List<String> additionalRawArgs) {
         if (additionalRawArgs == null || additionalRawArgs.isEmpty()) {
             return;
