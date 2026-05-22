@@ -109,6 +109,14 @@ public final class DreaminaCliLocalSmokeMain {
             DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo();
             printTyped("helpInfo(root)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
         });
+        runStep(report, "helpInfo(multimodal2video)", () -> {
+            DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo("multimodal2video");
+            printTyped("helpInfo(multimodal2video)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+        });
+        runStep(report, "sessionListInfo(-n 5)", () -> {
+            DreaminaCliTypedResult<DreaminaSessionListResult> t = executor.sessionListInfo(java.util.Collections.singletonList("-n=5"));
+            printTyped("sessionListInfo(-n 5)", t.getRaw(), "rows=" + t.getStructured().getRows().size());
+        });
         runStep(report, "helpInfo(session)", () -> {
             DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo(DreaminaCliSubcommands.Account.SESSION);
             printTyped("helpInfo(session)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
