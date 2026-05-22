@@ -372,6 +372,16 @@ public class DreaminaCliExecutor {
     }
 
     /**
+     * {@code dreamina session ls}：{@code session list} 的官方别名；常用 {@code -n/--max-count} 可通过
+     * {@code additionalRawArgs} 传入。
+     *
+     * @param additionalRawArgs 可选 flag；可为 null
+     */
+    public DreaminaCliResult sessionLs(List<String> additionalRawArgs) {
+        return runSessionSub(DreaminaCliSubcommands.SessionSub.LS, null, null, additionalRawArgs);
+    }
+
+    /**
      * {@code dreamina session search <searchTerm>}；无额外 flag。
      *
      * @param searchTerm 检索关键词；可为 null（与 {@link #sessionSearch(String, List)} 一致，null 时不追加位置参数）
@@ -388,6 +398,16 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult sessionSearch(String searchTerm, List<String> additionalRawArgs) {
         return runSessionSub(DreaminaCliSubcommands.SessionSub.SEARCH, searchTerm, null, additionalRawArgs);
+    }
+
+    /**
+     * {@code dreamina session find <searchTerm>}：{@code session search} 的官方别名。
+     *
+     * @param searchTerm        检索词；可为 null
+     * @param additionalRawArgs 其它 flag；可为 null
+     */
+    public DreaminaCliResult sessionFind(String searchTerm, List<String> additionalRawArgs) {
+        return runSessionSub(DreaminaCliSubcommands.SessionSub.FIND, searchTerm, null, additionalRawArgs);
     }
 
     /**
@@ -415,6 +435,30 @@ public class DreaminaCliExecutor {
     }
 
     /**
+     * {@code dreamina session update <sessionId> <newName>}：{@code session rename} 的官方别名。
+     */
+    public DreaminaCliResult sessionUpdate(String sessionId, String newName) {
+        return sessionUpdate(sessionId, newName, Collections.emptyList());
+    }
+
+    /**
+     * {@code dreamina session update <sessionId> <newName>}。
+     *
+     * @param sessionId         当前会话标识；不得为 null/空白
+     * @param newName           新显示名；不得为 null/空白
+     * @param additionalRawArgs 其它 flag；可为 null
+     */
+    public DreaminaCliResult sessionUpdate(String sessionId, String newName, List<String> additionalRawArgs) {
+        Objects.requireNonNull(sessionId, "sessionId");
+        Objects.requireNonNull(newName, "newName");
+        if (DreaminaStrings.isBlank(sessionId) || DreaminaStrings.isBlank(newName)) {
+            throw new IllegalArgumentException("sessionId and newName must not be blank");
+        }
+        return runSessionSub(
+            DreaminaCliSubcommands.SessionSub.UPDATE, sessionId.trim(), newName.trim(), additionalRawArgs);
+    }
+
+    /**
      * {@code dreamina session delete <sessionId>}。
      */
     public DreaminaCliResult sessionDelete(String sessionId) {
@@ -433,6 +477,27 @@ public class DreaminaCliExecutor {
             throw new IllegalArgumentException("sessionId must not be blank");
         }
         return runSessionSub(DreaminaCliSubcommands.SessionSub.DELETE, sessionId.trim(), null, additionalRawArgs);
+    }
+
+    /**
+     * {@code dreamina session rm <sessionId>}：{@code session delete} 的官方别名。
+     */
+    public DreaminaCliResult sessionRm(String sessionId) {
+        return sessionRm(sessionId, Collections.emptyList());
+    }
+
+    /**
+     * {@code dreamina session rm <sessionId>}。
+     *
+     * @param sessionId         要删除的会话标识；不得为 null/空白
+     * @param additionalRawArgs 其它 flag；可为 null
+     */
+    public DreaminaCliResult sessionRm(String sessionId, List<String> additionalRawArgs) {
+        Objects.requireNonNull(sessionId, "sessionId");
+        if (DreaminaStrings.isBlank(sessionId)) {
+            throw new IllegalArgumentException("sessionId must not be blank");
+        }
+        return runSessionSub(DreaminaCliSubcommands.SessionSub.RM, sessionId.trim(), null, additionalRawArgs);
     }
 
     /**
@@ -863,6 +928,16 @@ public class DreaminaCliExecutor {
     }
 
     /**
+     * {@link #sessionLs(List)} 的结构化视图。
+     *
+     * @param additionalRawArgs 透传到 CLI 的 flag，如 {@code -n=100}
+     */
+    public DreaminaCliTypedResult<DreaminaSessionListResult> sessionLsInfo(List<String> additionalRawArgs) {
+        DreaminaCliResult raw = sessionLs(additionalRawArgs);
+        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionList(raw));
+    }
+
+    /**
      * {@link #sessionSearch(String)} 的结构化视图。
      *
      * @param searchTerm 检索关键字；可为 null（等同底层 CLI 语义）
@@ -878,6 +953,15 @@ public class DreaminaCliExecutor {
     public DreaminaCliTypedResult<DreaminaSessionSearchResult> sessionSearchInfo(
         String searchTerm, List<String> additionalRawArgs) {
         DreaminaCliResult raw = sessionSearch(searchTerm, additionalRawArgs);
+        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionSearch(searchTerm, raw));
+    }
+
+    /**
+     * {@link #sessionFind(String, List)} 的结构化视图。
+     */
+    public DreaminaCliTypedResult<DreaminaSessionSearchResult> sessionFindInfo(
+        String searchTerm, List<String> additionalRawArgs) {
+        DreaminaCliResult raw = sessionFind(searchTerm, additionalRawArgs);
         return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionSearch(searchTerm, raw));
     }
 
@@ -913,6 +997,15 @@ public class DreaminaCliExecutor {
     public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionRenameInfo(
         String sessionId, String newName, List<String> additionalRawArgs) {
         DreaminaCliResult raw = sessionRename(sessionId, newName, additionalRawArgs);
+        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+    }
+
+    /**
+     * {@link #sessionUpdate(String, String, List)} 的结构化视图。
+     */
+    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionUpdateInfo(
+        String sessionId, String newName, List<String> additionalRawArgs) {
+        DreaminaCliResult raw = sessionUpdate(sessionId, newName, additionalRawArgs);
         return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
     }
 
