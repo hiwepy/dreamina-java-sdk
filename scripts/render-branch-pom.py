@@ -880,7 +880,7 @@ def write_main_j17(version: str) -> None:
     write_slim_j17(version, "2.0.16", "main / Spring Boot 3.3.x baseline (JDK 17)")
 
 
-SNAPSHOT_SUFFIX = f"{os.environ.get('RELEASE_DATE', '20260516')}-SNAPSHOT"
+SNAPSHOT_SUFFIX = f"{os.environ.get('RELEASE_DATE', '20260522')}-SNAPSHOT"
 
 
 def apply_aliyun_distribution_management() -> None:
