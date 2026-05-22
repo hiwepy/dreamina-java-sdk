@@ -61,9 +61,12 @@ public class DreaminaText2VideoRequest implements DreaminaCliArgumentProvider {
 
     @Override
     public List<String> toCliArgs() {
+        if (modelVersion != null && !modelVersion.supportsText2Video()) {
+            throw new IllegalArgumentException("text2video only supports seedance model family");
+        }
         List<String> args = new ArrayList<>();
         DreaminaCliRequestSupport.addFlag(args, "--prompt", DreaminaCliRequestSupport.requireNonBlank(prompt, "prompt"));
-        DreaminaCliRequestSupport.requireRange(durationSeconds, 4, 15, "durationSeconds");
+        DreaminaCliRequestSupport.requireVideoDuration(durationSeconds, modelVersion, "durationSeconds");
         DreaminaCliRequestSupport.addFlag(args, "--duration", durationSeconds);
         DreaminaCliRequestSupport.addFlag(args, "--ratio", ratio == null ? null : ratio.getCliValue());
         DreaminaCliRequestSupport.addFlag(args, "--model_version", modelVersion == null ? null : modelVersion.getCliValue());
