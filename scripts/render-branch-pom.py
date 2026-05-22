@@ -10,6 +10,7 @@ import os
 import pathlib
 import re
 import sys
+from datetime import date
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 POM = ROOT / "pom.xml"
@@ -880,7 +881,16 @@ def write_main_j17(version: str) -> None:
     write_slim_j17(version, "2.0.16", "main / Spring Boot 3.3.x baseline (JDK 17)")
 
 
-SNAPSHOT_SUFFIX = f"{os.environ.get('RELEASE_DATE', '20260522')}-SNAPSHOT"
+def version_date_suffix() -> str:
+    """SNAPSHOT: {date}-SNAPSHOT；RELEASE(RELEASE=1): 仅 {date}。"""
+    raw = os.environ.get("RELEASE_DATE", "").strip()
+    day = raw if raw else date.today().strftime("%Y%m%d")
+    if os.environ.get("RELEASE", "").strip().lower() in ("1", "true", "yes"):
+        return day
+    return f"{day}-SNAPSHOT"
+
+
+VERSION_DATE_SUFFIX = version_date_suffix()
 
 
 def apply_aliyun_distribution_management() -> None:
@@ -895,7 +905,7 @@ def apply_aliyun_distribution_management() -> None:
 
 
 def render(branch: str) -> None:
-    snapshot = SNAPSHOT_SUFFIX
+    snapshot = VERSION_DATE_SUFFIX
     if branch == "main":
         write_main_j17(f"3.3.x.{snapshot}")
     elif branch == "feature/v1.0.0":
