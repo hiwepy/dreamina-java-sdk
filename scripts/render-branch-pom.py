@@ -10,6 +10,7 @@ import os
 import pathlib
 import re
 import sys
+from datetime import date
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 POM = ROOT / "pom.xml"
@@ -880,7 +881,14 @@ def write_main_j17(version: str) -> None:
     write_slim_j17(version, "2.0.16", "main / Spring Boot 3.3.x baseline (JDK 17)")
 
 
-SNAPSHOT_SUFFIX = f"{os.environ.get('RELEASE_DATE', '20260516')}-SNAPSHOT"
+def _snapshot_suffix() -> str:
+    """{YYYYMMDD}-SNAPSHOT；日期来自 RELEASE_DATE 或当天。"""
+    raw = os.environ.get("RELEASE_DATE", "").strip()
+    day = raw if raw else date.today().strftime("%Y%m%d")
+    return f"{day}-SNAPSHOT"
+
+
+SNAPSHOT_SUFFIX = _snapshot_suffix()
 
 
 def apply_aliyun_distribution_management() -> None:
