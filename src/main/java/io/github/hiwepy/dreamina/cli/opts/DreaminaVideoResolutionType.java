@@ -11,8 +11,8 @@ import lombok.Getter;
 @Getter
 public enum DreaminaVideoResolutionType {
 
-    RESOLUTION_720P("720P"),
-    RESOLUTION_1080P("1080P");
+    RESOLUTION_720P("720p"),
+    RESOLUTION_1080P("1080p");
 
     private final String cliValue;
 
