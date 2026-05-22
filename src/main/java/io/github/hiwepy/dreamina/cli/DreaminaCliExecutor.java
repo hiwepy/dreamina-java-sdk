@@ -14,6 +14,8 @@ import io.github.hiwepy.dreamina.cli.opts.DreaminaFrames2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaImage2ImageRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaImage2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaImageUpscaleRequest;
+import io.github.hiwepy.dreamina.cli.opts.DreaminaListTaskRequest;
+import io.github.hiwepy.dreamina.cli.opts.DreaminaQueryResultRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaMultiframe2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaMultimodal2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaText2ImageRequest;
@@ -726,6 +728,17 @@ public class DreaminaCliExecutor {
     }
 
     /**
+     * 使用强类型请求对象调用 {@code dreamina query_result}。
+     *
+     * @param request 查询请求；不得为 null
+     * @return CLI 原始执行快照
+     */
+    public DreaminaCliResult queryResult(DreaminaQueryResultRequest request) {
+        Objects.requireNonNull(request, "request");
+        return invoke(DreaminaCliSubcommands.Task.QUERY_RESULT, request.toCliArgs());
+    }
+
+    /**
      * 调用 {@code dreamina list_task} 枚举任务列表。
      *
      * @return CLI 聚合后的标准输出/错误快照
@@ -741,6 +754,17 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliResult listTask(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Task.LIST_TASK, additionalRawArgs);
+    }
+
+    /**
+     * 使用强类型请求对象调用 {@code dreamina list_task}。
+     *
+     * @param request 列表筛选请求；不得为 null
+     * @return CLI 原始执行快照
+     */
+    public DreaminaCliResult listTask(DreaminaListTaskRequest request) {
+        Objects.requireNonNull(request, "request");
+        return invoke(DreaminaCliSubcommands.Task.LIST_TASK, request.toCliArgs());
     }
 
     // -------------------------------------------------------------------------
@@ -909,6 +933,14 @@ public class DreaminaCliExecutor {
     }
 
     /**
+     * {@link #listTask(DreaminaListTaskRequest)} 的结构化视图。
+     */
+    public DreaminaCliTypedResult<DreaminaTaskListResult> listTaskInfo(DreaminaListTaskRequest request) {
+        DreaminaCliResult raw = listTask(request);
+        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapTaskList(raw));
+    }
+
+    /**
      * {@link #queryResult(String)} 的结构化视图。
      *
      * @param submitId 提交编号
@@ -923,6 +955,14 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliTypedResult<DreaminaQueryResult> queryResultInfo(String submitId, List<String> additionalRawArgs) {
         DreaminaCliResult raw = queryResult(submitId, additionalRawArgs);
+        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
+    }
+
+    /**
+     * {@link #queryResult(DreaminaQueryResultRequest)} 的结构化视图。
+     */
+    public DreaminaCliTypedResult<DreaminaQueryResult> queryResultInfo(DreaminaQueryResultRequest request) {
+        DreaminaCliResult raw = queryResult(request);
         return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
     }
 
@@ -1165,7 +1205,7 @@ public class DreaminaCliExecutor {
      *
      * @param subcommandTokens 至少一段，每段为无空白的子命令 token
      */
-    private CommandLine newSubcommandChain(String... subcommandTokens) {
+    CommandLine newSubcommandChain(String... subcommandTokens) {
         if (subcommandTokens == null || subcommandTokens.length == 0) {
             throw new IllegalArgumentException("subcommandTokens must be non-empty");
         }
@@ -1230,7 +1270,7 @@ public class DreaminaCliExecutor {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream err = new ByteArrayOutputStream();
-        DefaultExecutor executor = new DefaultExecutor();
+        DefaultExecutor executor = newRunExecutor();
         executor.setStreamHandler(new PumpStreamHandler(out, err));
 
         // --- 可选工作目录：非法路径在使用前即失败 ---
@@ -1253,14 +1293,35 @@ public class DreaminaCliExecutor {
             executor.execute(commandLine, handler);
             handler.waitFor();
         } catch (IOException e) {
-            log.warn("Dreamina CLI spawn failed commandLine={}, message={}", commandLine, e.getMessage());
-            throw new DreaminaCliExecutableFailureException(
-                "Dreamina CLI could not be started (check PATH or executable path): " + commandLine, e);
+            throw failedToStart(commandLine, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new DreaminaCliException("Interrupted while awaiting Dreamina CLI subprocess", e, null);
         }
 
+        return completeAfterWait(commandLine, timeoutMs, out, err, handler, watchdog, null);
+    }
+
+    /**
+     * 创建 {@link #run(CommandLine)} 使用的进程执行器（包内可见，供单测注入抛出 {@link IOException} 的子类）。
+     */
+    DefaultExecutor newRunExecutor() {
+        return new DefaultExecutor();
+    }
+
+    /**
+     * 子进程已结束后，解析输出并映射为 {@link DreaminaCliResult} 或抛出执行层异常（包内可见，供单测注入 handler）。
+     *
+     * @param asyncFailureOverride 仅测试注入：非 null 时覆盖 {@link DefaultExecuteResultHandler#getException()} 结果
+     */
+    DreaminaCliResult completeAfterWait(
+        CommandLine commandLine,
+        long timeoutMs,
+        ByteArrayOutputStream out,
+        ByteArrayOutputStream err,
+        DefaultExecuteResultHandler handler,
+        ExecuteWatchdog watchdog,
+        Exception asyncFailureOverride) {
         String stdoutStr = new String(out.toByteArray(), StandardCharsets.UTF_8);
         String stderrStr = new String(err.toByteArray(), StandardCharsets.UTF_8);
         DreaminaParsedFields parsed = DreaminaCliOutputParser.parseBestEffort(stdoutStr, stderrStr);
@@ -1273,7 +1334,7 @@ public class DreaminaCliExecutor {
         }
 
         // --- ExecuteException：通常对应非零退出或进程被破坏 ---
-        Exception asyncFailure = handler.getException();
+        Exception asyncFailure = asyncFailureOverride != null ? asyncFailureOverride : handler.getException();
         if (asyncFailure instanceof ExecuteException) {
             ExecuteException ex = (ExecuteException) asyncFailure;
             DreaminaCliResult failed = snapshot(stdoutStr, stderrStr, normalizeExitValue(ex.getExitValue()), parsed);
@@ -1281,26 +1342,20 @@ public class DreaminaCliExecutor {
                 "Dreamina CLI failed (exitCode=" + ex.getExitValue() + "): " + commandLine, failed);
         }
         if (asyncFailure != null) {
-            DreaminaCliResult snapshot = snapshot(stdoutStr, stderrStr, readExitQuietly(handler), parsed);
-            throw new DreaminaCliException(
-                "Dreamina CLI async failure: " + commandLine + " cause=" + asyncFailure.getMessage(),
-                asyncFailure, snapshot);
+            DreaminaCliResult partial = snapshot(stdoutStr, stderrStr, readExitQuietly(handler), parsed);
+            throw failedAsync(commandLine, asyncFailure, partial);
         }
 
         final int exit;
         try {
             exit = handler.getExitValue();
         } catch (IllegalStateException e) {
-            throw new DreaminaCliException(
-                "Dreamina CLI completed without observable exit code: " + commandLine,
-                e,
-                snapshot(stdoutStr, stderrStr, null, parsed));
+            throw missingExitCode(commandLine, e, snapshot(stdoutStr, stderrStr, null, parsed));
         }
 
         if (exit != 0) {
             DreaminaCliResult failed = snapshot(stdoutStr, stderrStr, exit, parsed);
-            throw new DreaminaCliNonZeroExitException(
-                "Dreamina CLI non-zero exit (exitCode=" + exit + "): " + commandLine, failed);
+            throw nonZeroExitWithoutExecuteException(commandLine, exit, failed);
         }
 
         return DreaminaCliResult.builder()
@@ -1343,5 +1398,43 @@ public class DreaminaCliExecutor {
             .success(false)
             .parsed(parsed)
             .build();
+    }
+
+    /**
+     * 子进程无法启动时的统一异常（包内可见，供单测覆盖 spawn 失败分支）。
+     */
+    static DreaminaCliExecutableFailureException failedToStart(CommandLine commandLine, IOException cause) {
+        log.warn("Dreamina CLI spawn failed commandLine={}, message={}", commandLine, cause.getMessage());
+        return new DreaminaCliExecutableFailureException(
+            "Dreamina CLI could not be started (check PATH or executable path): " + commandLine, cause);
+    }
+
+    /**
+     * 非 {@link ExecuteException} 的异步失败（包内可见，供单测覆盖）。
+     */
+    static DreaminaCliException failedAsync(
+        CommandLine commandLine, Exception asyncFailure, DreaminaCliResult partial) {
+        return new DreaminaCliException(
+            "Dreamina CLI async failure: " + commandLine + " cause=" + asyncFailure.getMessage(),
+            asyncFailure,
+            partial);
+    }
+
+    /**
+     * 进程结束但无法读取退出码（包内可见，供单测覆盖）。
+     */
+    static DreaminaCliException missingExitCode(
+        CommandLine commandLine, IllegalStateException cause, DreaminaCliResult partial) {
+        return new DreaminaCliException(
+            "Dreamina CLI completed without observable exit code: " + commandLine, cause, partial);
+    }
+
+    /**
+     * 非零退出且未包装为 {@link ExecuteException} 的场景（包内可见，供单测覆盖）。
+     */
+    static DreaminaCliNonZeroExitException nonZeroExitWithoutExecuteException(
+        CommandLine commandLine, int exitCode, DreaminaCliResult failed) {
+        return new DreaminaCliNonZeroExitException(
+            "Dreamina CLI non-zero exit (exitCode=" + exitCode + "): " + commandLine, failed);
     }
 }

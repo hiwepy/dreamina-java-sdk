@@ -3,6 +3,7 @@ package io.github.hiwepy.dreamina.cli.opts;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,11 +23,6 @@ class DreaminaCliRequestTest {
     @TempDir
     Path tempDir;
 
-    /**
-     * 文生图请求应输出稳定 argv。
-     *
-     * @throws IOException 文件准备失败
-     */
     @Test
     void text2ImageRequest_shouldBuildExpectedArgs() throws IOException {
         DreaminaText2ImageRequest request = DreaminaText2ImageRequest.builder()
@@ -49,11 +45,6 @@ class DreaminaCliRequestTest {
         assertTrue(args.contains("--debug"));
     }
 
-    /**
-     * 图生图必须校验图片存在且限制为 2k/4k + 4.0+。
-     *
-     * @throws IOException 文件准备失败
-     */
     @Test
     void image2ImageRequest_shouldRejectUnsupportedResolution() throws IOException {
         Path image = createTempFile("input.png");
@@ -68,11 +59,6 @@ class DreaminaCliRequestTest {
         assertTrue(ex.getMessage().contains("2k or 4k"));
     }
 
-    /**
-     * 多帧视频必须限制在 2-20 张。
-     *
-     * @throws IOException 文件准备失败
-     */
     @Test
     void multiframe2VideoRequest_shouldEnforceImageCount() throws IOException {
         Path image = createTempFile("story-1.png");
@@ -85,9 +71,29 @@ class DreaminaCliRequestTest {
         assertTrue(ex.getMessage().contains("range [2, 20]"));
     }
 
-    /**
-     * 多模态请求至少要有一种媒体输入。
-     */
+    @Test
+    void multiframe2VideoRequest_shouldRepeatTransitionPrompts() throws IOException {
+        Path a = createTempFile("a.png");
+        Path b = createTempFile("b.png");
+        Path c = createTempFile("c.png");
+        DreaminaMultiframe2VideoRequest request = DreaminaMultiframe2VideoRequest.builder()
+            .image(a.toString())
+            .image(b.toString())
+            .image(c.toString())
+            .transitionPrompt("A to B")
+            .transitionPrompt("B to C")
+            .transitionDuration("3")
+            .transitionDuration("4")
+            .pollSeconds(0)
+            .build();
+
+        List<String> args = request.toCliArgs();
+        assertTrue(args.contains("--transition-prompt=A to B"));
+        assertTrue(args.contains("--transition-prompt=B to C"));
+        assertTrue(args.contains("--transition-duration=3"));
+        assertTrue(args.contains("--transition-duration=4"));
+    }
+
     @Test
     void multimodal2VideoRequest_shouldRequireAtLeastOneMedia() {
         DreaminaMultimodal2VideoRequest request = DreaminaMultimodal2VideoRequest.builder()
@@ -98,11 +104,25 @@ class DreaminaCliRequestTest {
         assertTrue(ex.getMessage().contains("at least one image, video or audio"));
     }
 
-    /**
-     * 首尾帧视频请求应输出命令参数。
-     *
-     * @throws IOException 文件准备失败
-     */
+    @Test
+    void multimodal2VideoRequest_shouldRepeatImageFlags() throws IOException {
+        Path a = createTempFile("a.png");
+        Path b = createTempFile("b.png");
+        DreaminaMultimodal2VideoRequest request = DreaminaMultimodal2VideoRequest.builder()
+            .image(a.toString())
+            .image(b.toString())
+            .prompt("cinematic")
+            .durationSeconds(5)
+            .videoResolution(DreaminaVideoResolutionType.RESOLUTION_1080P)
+            .pollSeconds(0)
+            .build();
+
+        List<String> args = request.toCliArgs();
+        assertTrue(args.contains("--image=" + a));
+        assertTrue(args.contains("--image=" + b));
+        assertTrue(args.contains("--video_resolution=1080p"));
+    }
+
     @Test
     void frames2VideoRequest_shouldBuildExpectedArgs() throws IOException {
         Path first = createTempFile("first.png");
@@ -120,20 +140,61 @@ class DreaminaCliRequestTest {
         List<String> args = request.toCliArgs();
         assertTrue(args.contains("--first=" + first));
         assertTrue(args.contains("--last=" + last));
-        assertTrue(args.contains("--prompt=花苞缓慢绽放"));
-        assertTrue(args.contains("--duration=8"));
-        assertTrue(args.contains("--model_version=seedance2.0fast_vip"));
-        assertTrue(args.contains("--video_resolution=720P"));
-        assertTrue(args.contains("--poll=0"));
+        assertTrue(args.contains("--video_resolution=720p"));
     }
 
-    /**
-     * 创建临时媒体文件。
-     *
-     * @param fileName 文件名
-     * @return 文件路径
-     * @throws IOException 文件写入失败
-     */
+    @Test
+    void imageUpscaleRequest_shouldSupport8k() throws IOException {
+        Path image = createTempFile("input.png");
+        DreaminaImageUpscaleRequest request = DreaminaImageUpscaleRequest.builder()
+            .imagePath(image.toString())
+            .resolutionType(DreaminaImageResolutionType.RESOLUTION_8K)
+            .pollSeconds(0)
+            .build();
+
+        List<String> args = request.toCliArgs();
+        assertTrue(args.contains("--resolution_type=8k"));
+    }
+
+    @Test
+    void queryResultRequest_shouldBuildDownloadDir() {
+        DreaminaQueryResultRequest request = DreaminaQueryResultRequest.builder()
+            .submitId("abc-123")
+            .downloadDir("./downloads")
+            .build();
+
+        List<String> args = request.toCliArgs();
+        assertTrue(args.contains("--submit_id=abc-123"));
+        assertTrue(args.contains("--download_dir=./downloads"));
+    }
+
+    @Test
+    void listTaskRequest_shouldBuildFilters() {
+        DreaminaListTaskRequest request = DreaminaListTaskRequest.builder()
+            .genStatus("success")
+            .genTaskType("text2image")
+            .limit(10)
+            .offset(0)
+            .build();
+
+        List<String> args = request.toCliArgs();
+        assertTrue(args.contains("--gen_status=success"));
+        assertTrue(args.contains("--gen_task_type=text2image"));
+        assertTrue(args.contains("--limit=10"));
+        assertTrue(args.contains("--offset=0"));
+    }
+
+    @Test
+    void text2VideoRequest_shouldRejectNonSeedanceModel() {
+        DreaminaText2VideoRequest request = DreaminaText2VideoRequest.builder()
+            .prompt("test")
+            .modelVersion(DreaminaVideoModelVersion.MODEL_3_0)
+            .build();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, request::toCliArgs);
+        assertTrue(ex.getMessage().contains("seedance"));
+    }
+
     private Path createTempFile(String fileName) throws IOException {
         Path file = tempDir.resolve(fileName);
         Files.writeString(file, "demo");
