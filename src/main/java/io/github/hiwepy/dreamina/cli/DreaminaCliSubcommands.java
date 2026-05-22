@@ -79,14 +79,26 @@ public final class DreaminaCliSubcommands {
         /** {@code dreamina session list} */
         public static final String LIST = "list";
 
+        /** {@code dreamina session ls}：{@link #LIST} 的官方别名。 */
+        public static final String LS = "ls";
+
         /** {@code dreamina session search} */
         public static final String SEARCH = "search";
+
+        /** {@code dreamina session find}：{@link #SEARCH} 的官方别名。 */
+        public static final String FIND = "find";
 
         /** {@code dreamina session rename} */
         public static final String RENAME = "rename";
 
+        /** {@code dreamina session update}：{@link #RENAME} 的官方别名。 */
+        public static final String UPDATE = "update";
+
         /** {@code dreamina session delete} */
         public static final String DELETE = "delete";
+
+        /** {@code dreamina session rm}：{@link #DELETE} 的官方别名。 */
+        public static final String RM = "rm";
     }
 
     /**
