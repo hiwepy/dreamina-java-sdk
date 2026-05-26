@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public final class DreaminaCliStructuredPayloadMapper {
 
     private static final TypeReference<List<DreaminaTaskItem>> TASK_LIST_TYPE =
-        new TypeReference<>() {};
+        new TypeReference<List<DreaminaTaskItem>>() {};
 
     private static final Pattern SESSION_LIST_ROW = Pattern.compile(
         "^(?<id>\\d+)\\s+(?<name>.+?)\\s+(?<pinned>Yes|No)\\s+(?<updated>\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2})$");
