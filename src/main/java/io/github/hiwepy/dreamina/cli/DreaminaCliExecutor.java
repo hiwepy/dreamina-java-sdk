@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import io.github.hiwepy.dreamina.cli.support.SubprocessExecutionSupport;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
@@ -123,6 +124,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
  * @since 1.0.0
  */
 @Slf4j
+@Getter
 public class DreaminaCliExecutor {
 
     private final DreaminaCliProperties properties;

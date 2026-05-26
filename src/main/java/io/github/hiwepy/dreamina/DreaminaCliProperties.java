@@ -41,6 +41,12 @@ public class DreaminaCliProperties {
     private int maxConcurrentExecutions = 0;
 
     /**
+     * 启动探测（{@code dreamina version}）专用超时（毫秒）；小于等于 0 时探测使用 30 秒。
+     * <p>不影响业务调用的 {@link #commandTimeoutMillis}。</p>
+     */
+    private long startupProbeTimeoutMillis = 30_000L;
+
+    /**
      * 编排层默认轮询间隔（秒）。
      * <p>
      * 例如在 {@code query_result} 与 {@code text2image} 异步链路之间休眠间隔的可复用默认值；
