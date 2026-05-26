@@ -3,11 +3,13 @@ package io.github.hiwepy.dreamina.cli;
 import io.github.hiwepy.dreamina.DreaminaCliProperties;
 import io.github.hiwepy.dreamina.cli.parser.DreaminaParsedFields;
 import io.github.hiwepy.dreamina.cli.support.MockDreaminaCli;
+import io.github.hiwepy.dreamina.cli.support.SubprocessExecutionSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import io.github.hiwepy.dreamina.exception.DreaminaCliException;
 import io.github.hiwepy.dreamina.exception.DreaminaCliExecutableFailureException;
 import io.github.hiwepy.dreamina.exception.DreaminaCliNonZeroExitException;
+import io.github.hiwepy.dreamina.exception.DreaminaCliTimeoutException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -16,9 +18,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
-import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.Executor;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,6 +95,7 @@ class DreaminaCliExecutorCoverageMockTest {
                 new ByteArrayOutputStream(),
                 handler,
                 watchdog,
+                false,
                 new RuntimeException("async")));
     }
 
@@ -111,6 +112,26 @@ class DreaminaCliExecutorCoverageMockTest {
                 new ByteArrayOutputStream(),
                 handler,
                 watchdog,
+                false,
+                null));
+    }
+
+    @Test void completeAfterWaitWaitTimedOutShouldThrowTimeoutException() {
+        CommandLine cmd = new CommandLine("dreamina");
+        StubHandler handler = new StubHandler(0, false);
+        ExecuteWatchdog watchdog = ExecuteWatchdog.builder()
+                .setTimeout(java.time.Duration.ofSeconds(5))
+                .get();
+        assertThrows(
+            DreaminaCliTimeoutException.class,
+            () -> executor.completeAfterWait(
+                cmd,
+                5_000L,
+                new ByteArrayOutputStream(),
+                new ByteArrayOutputStream(),
+                handler,
+                watchdog,
+                true,
                 null));
     }
 
@@ -127,6 +148,7 @@ class DreaminaCliExecutorCoverageMockTest {
                 new ByteArrayOutputStream(),
                 handler,
                 watchdog,
+                false,
                 null));
     }
 
@@ -165,13 +187,9 @@ class DreaminaCliExecutorCoverageMockTest {
         props.setCommandTimeoutMillis(5_000L);
         DreaminaCliExecutor failing = new DreaminaCliExecutor(props) {
             @Override
-            DefaultExecutor newRunExecutor() {
-                return new DefaultExecutor() {
-                    @Override
-                    public void execute(CommandLine cmd, ExecuteResultHandler handler) throws IOException {
-                        throw new IOException("spawn-fail-run");
-                    }
-                };
+            SubprocessExecutionSupport.RunSession executeSubprocess(
+                    SubprocessExecutionSupport.ExecutionRequest request) throws IOException {
+                throw new IOException("spawn-fail-run");
             }
         };
         assertThrows(DreaminaCliExecutableFailureException.class, failing::version);
