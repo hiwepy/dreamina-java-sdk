@@ -41,13 +41,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import io.github.hiwepy.dreamina.cli.support.SubprocessExecutionSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 
 /**
  * 基于 Apache Commons Exec 的 Dreamina CLI 进程执行封装。
@@ -139,6 +139,7 @@ public class DreaminaCliExecutor {
      */
     public DreaminaCliExecutor(DreaminaCliProperties properties) {
         this.properties = Objects.requireNonNull(properties, "properties");
+        SubprocessExecutionSupport.configureMaxConcurrentExecutions(properties.getMaxConcurrentExecutions());
     }
 
     // -------------------------------------------------------------------------
@@ -1351,53 +1352,66 @@ public class DreaminaCliExecutor {
 
     /**
      * 以 Commons Exec + Watchdog 执行命令行，并完成统一的结果与异常语义。
-     *
-     * <p>Commons Exec 1.4 仍将 {@link DefaultExecutor}、{@link ExecuteWatchdog} 部分入口标为过时；待上游稳定替代 API 后可统一迁移。</p>
      */
-    @SuppressWarnings("deprecation")
     private DreaminaCliResult run(CommandLine commandLine) {
         long timeoutMs = properties.getCommandTimeoutMillis();
         if (timeoutMs <= 0) {
             throw new IllegalStateException("dreamina.cli.command-timeout-millis must be positive");
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ByteArrayOutputStream err = new ByteArrayOutputStream();
-        DefaultExecutor executor = newRunExecutor();
-        executor.setStreamHandler(new PumpStreamHandler(out, err));
+        File workingDirectory = resolveWorkingDirectory();
+        SubprocessExecutionSupport.ExecutionRequest request =
+                new SubprocessExecutionSupport.ExecutionRequest(commandLine, workingDirectory, null, timeoutMs);
 
-        // --- 可选工作目录：非法路径在使用前即失败 ---
-        String wdProperty = properties.getWorkingDirectory();
-        if (wdProperty != null && !wdProperty.trim().isEmpty()) {
-            File wd = new File(wdProperty.trim());
-            if (!wd.isDirectory()) {
-                throw new DreaminaCliExecutableFailureException(
-                    "dreamina.cli.working-directory is not an existing directory: " + wd.getAbsolutePath(), null);
-            }
-            executor.setWorkingDirectory(wd);
-        }
-
-        ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutMs);
-        executor.setWatchdog(watchdog);
-        DefaultExecuteResultHandler handler = new DefaultExecuteResultHandler();
-
-        // --- 启动子进程并阻塞等待收尾 ---
         try {
-            executor.execute(commandLine, handler);
-            handler.waitFor();
+            SubprocessExecutionSupport.RunSession session = executeSubprocess(request);
+            return completeAfterWait(
+                    commandLine,
+                    timeoutMs,
+                    session.getStdout(),
+                    session.getStderr(),
+                    session.getHandler(),
+                    session.getWatchdog(),
+                    session.isWaitTimedOut(),
+                    null);
         } catch (IOException e) {
             throw failedToStart(commandLine, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new DreaminaCliException("Interrupted while awaiting Dreamina CLI subprocess", e, null);
         }
+    }
 
-        return completeAfterWait(commandLine, timeoutMs, out, err, handler, watchdog, null);
+    /**
+     * 解析并校验工作目录配置。
+     */
+    private File resolveWorkingDirectory() {
+        String wdProperty = properties.getWorkingDirectory();
+        if (wdProperty == null || wdProperty.trim().isEmpty()) {
+            return null;
+        }
+        File wd = new File(wdProperty.trim());
+        if (!wd.isDirectory()) {
+            throw new DreaminaCliExecutableFailureException(
+                    "dreamina.cli.working-directory is not an existing directory: " + wd.getAbsolutePath(), null);
+        }
+        return wd;
+    }
+
+    /**
+     * 启动子进程（包内可见，供单测注入失败场景）。
+     */
+    SubprocessExecutionSupport.RunSession executeSubprocess(SubprocessExecutionSupport.ExecutionRequest request)
+            throws IOException, InterruptedException {
+        return SubprocessExecutionSupport.execute(request);
     }
 
     /**
      * 创建 {@link #run(CommandLine)} 使用的进程执行器（包内可见，供单测注入抛出 {@link IOException} 的子类）。
+     *
+     * @deprecated 子进程执行已迁移至 {@link SubprocessExecutionSupport}；保留以兼容旧单测覆写点。
      */
+    @Deprecated
     DefaultExecutor newRunExecutor() {
         return new DefaultExecutor();
     }
@@ -1414,13 +1428,14 @@ public class DreaminaCliExecutor {
         ByteArrayOutputStream err,
         DefaultExecuteResultHandler handler,
         ExecuteWatchdog watchdog,
+        boolean waitTimedOut,
         Exception asyncFailureOverride) {
         String stdoutStr = new String(out.toByteArray(), StandardCharsets.UTF_8);
         String stderrStr = new String(err.toByteArray(), StandardCharsets.UTF_8);
         DreaminaParsedFields parsed = DreaminaCliOutputParser.parseBestEffort(stdoutStr, stderrStr);
 
-        // --- 超时：Watchdog 结束进程，优先抛出超时异常 ---
-        if (watchdog.killedProcess()) {
+        // --- 超时：Watchdog 结束进程或 handler 等待超时，优先抛出超时异常 ---
+        if (waitTimedOut || watchdog.killedProcess()) {
             DreaminaCliResult partial = snapshot(stdoutStr, stderrStr, readExitQuietly(handler), parsed);
             throw new DreaminaCliTimeoutException(
                 "Dreamina CLI timed out after " + timeoutMs + " ms: " + commandLine, partial);
