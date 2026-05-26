@@ -1,4 +1,4 @@
-package io.github.hiwepy.dreamina.cli;
+package io.github.hiwepy.dreamina.cli.model;
 
 import lombok.Builder;
 import lombok.Getter;

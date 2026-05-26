@@ -19,18 +19,21 @@ import io.github.hiwepy.dreamina.cli.opts.DreaminaText2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaVideoModelVersion;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaVideoResolutionType;
 import io.github.hiwepy.dreamina.cli.DreaminaCliResult;
-import io.github.hiwepy.dreamina.cli.DreaminaCliTypedResult;
-import io.github.hiwepy.dreamina.cli.DreaminaDeviceLoginResult;
-import io.github.hiwepy.dreamina.cli.DreaminaGenerateSubmitResult;
-import io.github.hiwepy.dreamina.cli.DreaminaHelpResult;
-import io.github.hiwepy.dreamina.cli.DreaminaLoginResult;
-import io.github.hiwepy.dreamina.cli.DreaminaQueryResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionListResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionMutationResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionSearchResult;
-import io.github.hiwepy.dreamina.cli.DreaminaTaskListResult;
-import io.github.hiwepy.dreamina.cli.DreaminaUserCreditResult;
-import io.github.hiwepy.dreamina.cli.DreaminaVersionResult;
+import io.github.hiwepy.dreamina.cli.DreaminaCliResponse;
+import io.github.hiwepy.dreamina.cli.model.DreaminaGenerateSubmit;
+import io.github.hiwepy.dreamina.cli.model.DreaminaHelp;
+import io.github.hiwepy.dreamina.cli.model.DreaminaLogin;
+import io.github.hiwepy.dreamina.cli.model.DreaminaQueryResult;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionList;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionMutation;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionSearch;
+import io.github.hiwepy.dreamina.cli.model.DreaminaTaskItem;
+import io.github.hiwepy.dreamina.cli.model.DreaminaUserCredit;
+import io.github.hiwepy.dreamina.cli.model.DreaminaVersion;
+
+
+
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,72 +99,73 @@ public final class DreaminaCliLocalSmokeMain {
 
         // --- 只读：版本 / 额度 / 帮助 / 登录 headless（复用态） / 会话 / 任务 ---
         runStep(report, "versionInfo", () -> {
-            DreaminaCliTypedResult<DreaminaVersionResult> t = executor.versionInfo();
-            printTyped("versionInfo", t.getRaw(), t.getStructured());
-            Objects.requireNonNull(t.getStructured().getVersion(), "version field");
+            DreaminaCliResponse<DreaminaVersion> t = executor.versionInfo();
+            printTyped("versionInfo", t, t.getBody());
+            Objects.requireNonNull(t.getBody().getVersion(), "version field");
         });
         runStep(report, "userCreditInfo", () -> {
-            DreaminaCliTypedResult<DreaminaUserCreditResult> t = executor.userCreditInfo();
-            printTyped("userCreditInfo", t.getRaw(), t.getStructured());
-            Objects.requireNonNull(t.getStructured().getTotalCredit(), "totalCredit");
+            DreaminaCliResponse<DreaminaUserCredit> t = executor.userCreditInfo();
+            printTyped("userCreditInfo", t, t.getBody());
+            Objects.requireNonNull(t.getBody().getTotalCredit(), "totalCredit");
         });
         runStep(report, "helpInfo(root)", () -> {
-            DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo();
-            printTyped("helpInfo(root)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+            DreaminaCliResponse<DreaminaHelp> t = executor.helpInfo();
+            printTyped("helpInfo(root)", t, abbreviate(t.getCombinedText(), 400));
         });
         runStep(report, "helpInfo(multimodal2video)", () -> {
-            DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo("multimodal2video");
-            printTyped("helpInfo(multimodal2video)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+            DreaminaCliResponse<DreaminaHelp> t = executor.helpInfo("multimodal2video");
+            printTyped("helpInfo(multimodal2video)", t, abbreviate(t.getCombinedText(), 400));
         });
         runStep(report, "sessionListInfo(-n 5)", () -> {
-            DreaminaCliTypedResult<DreaminaSessionListResult> t = executor.sessionListInfo(java.util.Collections.singletonList("-n=5"));
-            printTyped("sessionListInfo(-n 5)", t.getRaw(), "rows=" + t.getStructured().getRows().size());
+            DreaminaCliResponse<DreaminaSessionList> t =
+                executor.sessionListInfo(java.util.Collections.singletonList("-n=5"));
+            printTyped("sessionListInfo(-n 5)", t, "rows=" + t.getBody().getRows().size());
         });
         runStep(report, "helpInfo(session)", () -> {
-            DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo(DreaminaCliSubcommands.Account.SESSION);
-            printTyped("helpInfo(session)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+            DreaminaCliResponse<DreaminaHelp> t = executor.helpInfo(DreaminaCliSubcommands.Account.SESSION);
+            printTyped("helpInfo(session)", t, abbreviate(t.getCombinedText(), 400));
         });
         runStep(report, "helpInfo(text2image)", () -> {
-            DreaminaCliTypedResult<DreaminaHelpResult> t = executor.helpInfo(DreaminaCliSubcommands.Image.TEXT2IMAGE);
-            printTyped("helpInfo(text2image)", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+            DreaminaCliResponse<DreaminaHelp> t = executor.helpInfo(DreaminaCliSubcommands.Image.TEXT2IMAGE);
+            printTyped("helpInfo(text2image)", t, abbreviate(t.getCombinedText(), 400));
         });
         runStep(report, "helpImageUpscale", () -> {
-            DreaminaCliTypedResult<DreaminaHelpResult> t =
+            DreaminaCliResponse<DreaminaHelp> t =
                 executor.helpInfo(DreaminaCliSubcommands.Image.IMAGE_UPSCALE);
-            printTyped("helpImageUpscale", t.getRaw(), abbreviate(t.getStructured().getFullText(), 400));
+            printTyped("helpImageUpscale", t, abbreviate(t.getCombinedText(), 400));
         });
         runStep(report, "loginHeadlessInfo", () -> {
-            DreaminaCliTypedResult<DreaminaLoginResult> t = executor.loginHeadlessInfo();
+            DreaminaCliResponse<DreaminaLogin> t = executor.loginHeadlessInfo();
             printTyped(
                 "loginHeadlessInfo",
-                t.getRaw(),
-                "reused=" + t.getStructured().getOauthSessionReused()
-                    + " device=" + (t.getStructured().getDevice() != null));
+                t,
+                "reused=" + t.getBody().getOauthSessionReused()
+                    + " device=" + (t.getBody().getDevice() != null));
         });
         runStep(report, "sessionListInfo", () -> {
-            DreaminaCliTypedResult<DreaminaSessionListResult> t = executor.sessionListInfo();
-            printTyped("sessionListInfo", t.getRaw(), "rows=" + t.getStructured().getRows().size());
+            DreaminaCliResponse<DreaminaSessionList> t = executor.sessionListInfo();
+            printTyped("sessionListInfo", t, "rows=" + t.getBody().getRows().size());
         });
         runStep(report, "sessionSearchInfo", () -> {
-            DreaminaCliTypedResult<DreaminaSessionSearchResult> t = executor.sessionSearchInfo("default");
-            printTyped("sessionSearchInfo", t.getRaw(), "matches=" + t.getStructured().getMatches().size());
+            DreaminaCliResponse<DreaminaSessionSearch> t = executor.sessionSearchInfo("default");
+            printTyped("sessionSearchInfo", t, "rows=" + t.getBody().safeRows().size());
         });
         runStep(report, "listTaskInfo", () -> {
-            DreaminaCliTypedResult<DreaminaTaskListResult> t = executor.listTaskInfo();
+            DreaminaCliResponse<List<DreaminaTaskItem>> t = executor.listTaskInfo();
             printTyped(
                 "listTaskInfo",
-                t.getRaw(),
-                "taskCount=" + (t.getStructured().getTaskCount() == null ? "null" : t.getStructured().getTaskCount()));
+                t,
+                "taskCount=" + (t.getBody() == null ? "null" : t.getBody().size()));
         });
 
         // --- 会话变更：创建后立即改名，避免误删用户会话 ---
         final String[] createdIdHolder = new String[1];
         runStep(report, "sessionCreateInfo", () -> {
             String stamp = Long.toString(System.currentTimeMillis());
-            DreaminaCliTypedResult<DreaminaSessionMutationResult> t =
+            DreaminaCliResponse<DreaminaSessionMutation> t =
                 executor.sessionCreateInfo(Collections.singletonList("cli-java-smoke-" + stamp));
-            printTyped("sessionCreateInfo", t.getRaw(), t.getStructured());
-            createdIdHolder[0] = t.getStructured().getSessionId();
+            printTyped("sessionCreateInfo", t, t.getBody());
+            createdIdHolder[0] = t.getBody().getSessionId();
             if (createdIdHolder[0] == null) {
                 throw new IllegalStateException("session id parse null");
             }
@@ -171,9 +175,9 @@ public final class DreaminaCliLocalSmokeMain {
             if (sid == null) {
                 throw new IllegalStateException("skip rename — create failed");
             }
-            DreaminaCliTypedResult<DreaminaSessionMutationResult> t =
+            DreaminaCliResponse<DreaminaSessionMutation> t =
                 executor.sessionRenameInfo(sid, "cli-java-smoke-renamed");
-            printTyped("sessionRenameInfo", t.getRaw(), t.getStructured());
+            printTyped("sessionRenameInfo", t, t.getBody());
         });
 
         boolean skipGen = truthyEnv("DREAMINA_SMOKE_SKIP_GENERATE");
@@ -190,53 +194,53 @@ public final class DreaminaCliLocalSmokeMain {
 
         // --- 生成提交：最低参数（仍会消耗积分；失败区分平台并发等） ---
         runStep(report, "text2ImageSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
+            DreaminaCliResponse<DreaminaGenerateSubmit> t =
                 executor.text2ImageSubmit("smoke", Arrays.asList(
                     "--model_version=3.0",
                     "--resolution_type=1k",
                     "--ratio=1:1",
                     "--poll=0"));
-            printTyped("text2ImageSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("text2ImageSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "image2ImageSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
+            DreaminaCliResponse<DreaminaGenerateSubmit> t =
                 executor.image2ImageSubmit(tinyPath, "smoke", Arrays.asList(
                     "--resolution_type=2k",
                     "--ratio=1:1",
                     "--poll=0"));
-            printTyped("image2ImageSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("image2ImageSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "imageUpscaleSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.imageUpscaleSubmit(Arrays.asList(
+            DreaminaCliResponse<DreaminaGenerateSubmit> t = executor.imageUpscaleSubmit(Arrays.asList(
                 "--image=" + tinyPath,
                 "--resolution_type=2k",
                 "--poll=0"));
-            printTyped("imageUpscaleSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("imageUpscaleSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "text2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
+            DreaminaCliResponse<DreaminaGenerateSubmit> t =
                 executor.text2VideoSubmit("smoke", Arrays.asList(
                     "--duration=4",
                     "--video_resolution=720p",
                     "--ratio=1:1",
                     "--poll=0"));
-            printTyped("text2VideoSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("text2VideoSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "image2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t =
+            DreaminaCliResponse<DreaminaGenerateSubmit> t =
                 executor.image2VideoSubmit(tinyPath, "smoke", Arrays.asList(
                     "--duration=4",
                     "--video_resolution=720p",
                     "--poll=0"));
-            printTyped("image2VideoSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("image2VideoSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "frames2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.frames2VideoSubmit(Arrays.asList(
+            DreaminaCliResponse<DreaminaGenerateSubmit> t = executor.frames2VideoSubmit(Arrays.asList(
                 "--first=" + tinyPath,
                 "--last=" + tinyPath,
                 "--prompt=smoke",
@@ -244,20 +248,20 @@ public final class DreaminaCliLocalSmokeMain {
                 "--video_resolution=720p",
                 "--model_version=seedance2.0fast",
                 "--poll=0"));
-            printTyped("frames2VideoSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("frames2VideoSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "multiframe2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multiframe2VideoSubmit(Arrays.asList(
+            DreaminaCliResponse<DreaminaGenerateSubmit> t = executor.multiframe2VideoSubmit(Arrays.asList(
                 "--images=" + tinyPath + "," + tinyPath,
                 "--prompt=smoke",
                 "--duration=3",
                 "--poll=0"));
-            printTyped("multiframe2VideoSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("multiframe2VideoSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
         runStep(report, "multimodal2VideoSubmit", () -> {
-            DreaminaCliTypedResult<DreaminaGenerateSubmitResult> t = executor.multimodal2VideoSubmit(Arrays.asList(
+            DreaminaCliResponse<DreaminaGenerateSubmit> t = executor.multimodal2VideoSubmit(Arrays.asList(
                 "--image=" + tinyPath,
                 "--prompt=smoke",
                 "--duration=4",
@@ -265,8 +269,8 @@ public final class DreaminaCliLocalSmokeMain {
                 "--video_resolution=720p",
                 "--model_version=seedance2.0fast",
                 "--poll=0"));
-            printTyped("multimodal2VideoSubmit", t.getRaw(), summarizeSubmit(t.getStructured()));
-            rememberSubmit(submitIds, t.getStructured());
+            printTyped("multimodal2VideoSubmit", t, summarizeSubmit(t.getBody()));
+            rememberSubmit(submitIds, t.getBody());
         });
 
         // --- query_result：抽检首个可用 submitId ---
@@ -275,13 +279,13 @@ public final class DreaminaCliLocalSmokeMain {
             if (sid == null) {
                 throw new IllegalStateException("no submit id captured from generation steps");
             }
-            DreaminaCliTypedResult<DreaminaQueryResult> t = executor.queryResultInfo(sid);
+            DreaminaCliResponse<DreaminaQueryResult> t = executor.queryResultInfo(sid);
             printTyped(
                 "queryResultInfo",
-                t.getRaw(),
-                "submitId=" + t.getStructured().getSubmitId()
-                    + " genStatus=" + t.getStructured().getGenStatus()
-                    + " failReason=" + abbreviate(String.valueOf(t.getStructured().getFailReason()), 120));
+                t,
+                "submitId=" + t.getBody().getSubmitId()
+                    + " genStatus=" + t.getBody().getGenStatus()
+                    + " failReason=" + abbreviate(String.valueOf(t.getBody().getFailReason()), 120));
         });
 
         printReport(report);
@@ -290,7 +294,7 @@ public final class DreaminaCliLocalSmokeMain {
     /**
      * 记录 submitId（若结构化字段缺失则跳过）。
      */
-    private static void rememberSubmit(List<String> sink, DreaminaGenerateSubmitResult dto) {
+    private static void rememberSubmit(List<String> sink, DreaminaGenerateSubmit dto) {
         if (dto != null && DreaminaStrings.isNotBlank(dto.getSubmitId())) {
             sink.add(dto.getSubmitId());
         }
@@ -299,7 +303,7 @@ public final class DreaminaCliLocalSmokeMain {
     /**
      * 提交摘要：便于肉眼核对解析链路。
      */
-    private static String summarizeSubmit(DreaminaGenerateSubmitResult s) {
+    private static String summarizeSubmit(DreaminaGenerateSubmit s) {
         return "submitId=" + s.getSubmitId()
             + " genStatus=" + s.getGenStatus()
             + " failReason=" + abbreviate(String.valueOf(s.getFailReason()), 160)
@@ -331,12 +335,12 @@ public final class DreaminaCliLocalSmokeMain {
         }
     }
 
-    private static void printTyped(String label, DreaminaCliResult raw, Object structuredPreview) {
-        System.out.println("\n--- " + label + " --- success=" + raw.isSuccess() + " exit=" + raw.getExitCode());
+    private static void printTyped(String label, DreaminaCliResponse<?> response, Object structuredPreview) {
+        System.out.println("\n--- " + label + " --- success=" + response.isSuccess() + " exit=" + response.getExitCode());
         System.out.println("structured: " + formatStructuredPreview(structuredPreview));
-        System.out.println("stdout.head=" + abbreviate(raw.getStdout(), 280));
-        if (DreaminaStrings.isNotBlank(raw.getStderr())) {
-            System.out.println("stderr.head=" + abbreviate(raw.getStderr(), 280));
+        System.out.println("stdout.head=" + abbreviate(response.getStdout(), 280));
+        if (DreaminaStrings.isNotBlank(response.getStderr())) {
+            System.out.println("stderr.head=" + abbreviate(response.getStderr(), 280));
         }
     }
 
@@ -351,16 +355,16 @@ public final class DreaminaCliLocalSmokeMain {
             String s = (String) preview;
             return s;
         }
-        if (preview instanceof DreaminaVersionResult) {
-            DreaminaVersionResult v = (DreaminaVersionResult) preview;
+        if (preview instanceof DreaminaVersion) {
+            DreaminaVersion v = (DreaminaVersion) preview;
             return "version=" + v.getVersion() + " commit=" + v.getCommit() + " buildTime=" + v.getBuildTime();
         }
-        if (preview instanceof DreaminaUserCreditResult) {
-            DreaminaUserCreditResult c = (DreaminaUserCreditResult) preview;
+        if (preview instanceof DreaminaUserCredit) {
+            DreaminaUserCredit c = (DreaminaUserCredit) preview;
             return "totalCredit=" + c.getTotalCredit() + " userId=" + c.getUserId() + " vip=" + c.getVipLevel();
         }
-        if (preview instanceof DreaminaSessionMutationResult) {
-            DreaminaSessionMutationResult m = (DreaminaSessionMutationResult) preview;
+        if (preview instanceof DreaminaSessionMutation) {
+            DreaminaSessionMutation m = (DreaminaSessionMutation) preview;
             return "kind=" + m.getKind() + " id=" + m.getSessionId() + " name=" + m.getSessionName();
         }
         return preview.toString();
