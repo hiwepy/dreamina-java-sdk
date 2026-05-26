@@ -36,6 +36,11 @@ public class DreaminaCliProperties {
     private long commandTimeoutMillis = 120_000L;
 
     /**
+     * 本机 CLI 子进程最大并发数；小于等于 0 时使用 CPU 核心数与 2 的较大值。
+     */
+    private int maxConcurrentExecutions = 0;
+
+    /**
      * 编排层默认轮询间隔（秒）。
      * <p>
      * 例如在 {@code query_result} 与 {@code text2image} 异步链路之间休眠间隔的可复用默认值；
