@@ -61,7 +61,22 @@ String submitId = submit.getStructured().getSubmitId();
 | `executable` | CLI 可执行文件名或绝对路径，默认 `dreamina` |
 | `workingDirectory` | 执行工作目录，可选 |
 | `commandTimeoutMillis` | 单次命令执行超时 |
+| `startupProbeTimeoutMillis` | 启动探测专用超时（默认 30s），仅用于 `DreaminaCliAvailabilityChecker` |
 | `defaultPollIntervalSeconds` | 业务层轮询建议间隔 |
+
+## 启动就绪探测（无 Spring）
+
+在注册 Bean 或接受流量前，可调用 `DreaminaCliAvailabilityChecker` 执行 `dreamina version`：
+
+```java
+DreaminaCliAvailabilityChecker checker = new DreaminaCliAvailabilityChecker();
+DreaminaCliAvailabilityReport report = checker.check(executor);
+if (!report.isAvailable()) {
+    throw new IllegalStateException(report.toDiagnosticMessage());
+}
+```
+
+Spring Boot 应用推荐使用 [dreamina-spring-boot-starter](../dreamina-spring-boot-starter) 的 `dreamina.cli.startup-check-enabled`（默认开启）。
 
 ## Agent 编排 SOP
 
