@@ -1,0 +1,35 @@
+[
+  {
+    "submit_id": "7045230a-b96f-4470-8212-b424a609782c",
+    "gen_task_type": "multiframe2video",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [],
+      "videos": [
+        {
+          "fps": 24,
+          "width": 960,
+          "height": 960,
+          "format": "mp4",
+          "duration": 3.208
+        }
+      ]
+    },
+    "commerce_info": {
+      "credit_count": 6,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_video",
+          "benefit_type": "basic_video_operation_vgfm_v_three"
+        }
+      ]
+    }
+  }
+]

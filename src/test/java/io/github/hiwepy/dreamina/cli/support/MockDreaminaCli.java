@@ -120,23 +120,43 @@ public final class MockDreaminaCli {
                 echo "Usage: dreamina help [flags]"
                 ;;
               version)
-                echo '{"version":"mock-test","commit":"mock","build_time":"2026-01-01T00:00:00Z"}'
+                echo '{"version":"c58a6a2-dirty","commit":"c58a6a2","build_time":"2026-05-07T09:52:59Z"}'
                 ;;
               user_credit)
-                echo '{"total_credit":9999,"user_id":1,"vip_level":"mock"}'
+                echo '{"total_credit":4388,"user_id":1552973852847448,"user_name":"","vip_level":"maestro"}'
                 ;;
               login)
                 sub="${1:-}"
                 if [ "$sub" = "checklogin" ]; then
-                  echo '{"gen_status":"success","message":"mock checklogin ok"}'
+                  :
                 elif printf '%%s' "$*" | grep -q -- '--headless'; then
-                  echo '{"verification_uri":"https://mock/login","user_code":"MOCK","device_code":"dev-mock"}'
+                  if printf '%%s' "$*" | grep -q -- '--mock-device-flow'; then
+                    echo '{"verification_uri":"https://mock/login","user_code":"MOCK","device_code":"dev-mock"}'
+                  else
+                    echo '已复用当前本地 OAuth 登录态。'
+                  fi
                 else
-                  echo '已复用当前本地 OAuth 登录态。'
+                  cat <<'EOF'
+已复用当前本地 OAuth 登录态。
+当前登录账户信息：
+user_id: 1552973852847448
+vip_level: maestro
+total_credit: 4391
+EOF
                 fi
                 ;;
-              logout|relogin)
-                echo 'ok'
+              logout)
+                echo '已清除本地登录态。'
+                ;;
+              relogin)
+                cat <<'EOF'
+请使用浏览器完成 OAuth Device Flow 登录。
+verification_uri: https://jimeng.jianying.com/ai-tool/cli-auth
+user_code: 88d38543ef407cb0a01a61088ec0d32c
+device_code: 662eef8f79b0ee3c20d7222c5ec28ed3
+poll_interval: 1s
+expires_at: 2026-05-26T05:38:58Z
+EOF
                 ;;
               session)
                 sub="${1:-}"
@@ -166,19 +186,27 @@ EOF
                   delete|rm)
                     echo 'deleted'
                     ;;
+                  "")
+                    cat <<'EOF'
+Usage:
+  dreamina session [flags]
+
+Manage Dreamina sessions (create, list, search, rename, delete).
+EOF
+                    ;;
                   *)
                     echo "session sub=$sub"
                     ;;
                 esac
                 ;;
               list_task)
-                echo '[{"submit_id":"mock-submit-1","gen_task_type":"text2image","gen_status":"success"}]'
+                echo '[{"submit_id":"mock-submit-1","gen_task_type":"text2image","gen_status":"success","fail_reason":"","result_json":{"images":[{"width":1024,"height":1024}],"videos":[]},"commerce_info":{"credit_count":0,"triplet":{"resource_type":"","resource_id":"","benefit_type":""},"triplets":[{"resource_type":"aigc","resource_id":"generate_img","benefit_type":"image_uhd_4k"}]}}]'
                 ;;
               query_result)
-                echo '{"submit_id":"mock-submit-1","gen_status":"success","result_json":{"images":[{"image_url":"https://mock/img.png"}]}}'
+                echo '{"submit_id":"mock-submit-1","gen_status":"success","credit_count":3,"result_json":{"images":[{"image_url":"https://mock/img.png","width":2048,"height":2048}],"videos":[]},"queue_info":{"queue_idx":0,"priority":1,"queue_status":"Finish","queue_length":0}}'
                 ;;
               text2image|text2video|image2image|image_upscale|image2video|frames2video|multiframe2video|multimodal2video)
-                echo '{"submit_id":"mock-gen-1","gen_status":"querying","credit_count":1}'
+                echo '{"submit_id":"mock-gen-1","logid":"202605260533251720170000026033C60","gen_status":"querying","credit_count":3}'
                 ;;
               __exit_nonzero)
                 echo 'fail' >&2
