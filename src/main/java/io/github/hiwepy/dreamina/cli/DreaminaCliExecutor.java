@@ -20,19 +20,23 @@ import io.github.hiwepy.dreamina.cli.opts.DreaminaMultiframe2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaMultimodal2VideoRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaText2ImageRequest;
 import io.github.hiwepy.dreamina.cli.opts.DreaminaText2VideoRequest;
+import io.github.hiwepy.dreamina.cli.DreaminaCliResponse;
+import io.github.hiwepy.dreamina.cli.model.DreaminaCheckLogin;
+import io.github.hiwepy.dreamina.cli.model.DreaminaDeviceLogin;
+import io.github.hiwepy.dreamina.cli.model.DreaminaGenerateSubmit;
+import io.github.hiwepy.dreamina.cli.model.DreaminaHelp;
+import io.github.hiwepy.dreamina.cli.model.DreaminaLogin;
+import io.github.hiwepy.dreamina.cli.model.DreaminaLogout;
+import io.github.hiwepy.dreamina.cli.model.DreaminaQueryResult;
+import io.github.hiwepy.dreamina.cli.model.DreaminaRelogin;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionDelete;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionList;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionMutation;
+import io.github.hiwepy.dreamina.cli.model.DreaminaSessionSearch;
+import io.github.hiwepy.dreamina.cli.model.DreaminaTaskItem;
+import io.github.hiwepy.dreamina.cli.model.DreaminaUserCredit;
+import io.github.hiwepy.dreamina.cli.model.DreaminaVersion;
 import io.github.hiwepy.dreamina.cli.DreaminaCliResult;
-import io.github.hiwepy.dreamina.cli.DreaminaCliTypedResult;
-import io.github.hiwepy.dreamina.cli.DreaminaDeviceLoginResult;
-import io.github.hiwepy.dreamina.cli.DreaminaGenerateSubmitResult;
-import io.github.hiwepy.dreamina.cli.DreaminaHelpResult;
-import io.github.hiwepy.dreamina.cli.DreaminaLoginResult;
-import io.github.hiwepy.dreamina.cli.DreaminaQueryResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionListResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionMutationResult;
-import io.github.hiwepy.dreamina.cli.DreaminaSessionSearchResult;
-import io.github.hiwepy.dreamina.cli.DreaminaTaskListResult;
-import io.github.hiwepy.dreamina.cli.DreaminaUserCreditResult;
-import io.github.hiwepy.dreamina.cli.DreaminaVersionResult;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +65,7 @@ import org.apache.commons.exec.ExecuteWatchdog;
  *   <li><b>扩展位</b>：{@link #invoke(String, List)} 与各 {@code xxx(List&lt;String&gt; additionalRawArgs)}
  *       过载允许挂载官方新增 flag，无需为每个参数加长方法签名。</li>
  *   <li><b>执行语义</b>：统一超时、流捕获与非零退出映射；不包含会员、配额或与业务 ApplicationService 的耦合。</li>
- *   <li><b>结构化视图</b>：{@code versionInfo}/{@code *Submit} 等系列便捷方法与 {@link DreaminaCliTypedResult}
+ *   <li><b>结构化视图</b>：{@code versionInfo}/{@code *Submit} 等系列便捷方法与 {@link DreaminaCliResponse}
  *       在<strong>同一条执行链路</strong>上绑定原始 {@link DreaminaCliResult}；解析沉淀于 {@link DreaminaCliStructuredPayloadMapper}。</li>
  * </ul>
  * <pre>
@@ -150,8 +154,63 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina help} 打印总帮助或等价输出。
-     *
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina help}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina [flags]
+     * 
+     * 即梦 official AIGC CLI tool for login, account, and generation workflows
+     * 
+     * About:
+     *   dreamina is the 即梦 official AIGC CLI tool.
+     * 
+     * Quick start:
+     *   1. Run "dreamina login" to complete OAuth device login.
+     *   2. For headless login, run "dreamina login --headless", then "dreamina login checklogin --device_code=<device_code>".
+     *   3. Run a generator command such as "dreamina text2image --prompt=\"a cat portrait\"".
+     *   4. Use "dreamina query_result --submit_id=<id>" for async tasks, or "dreamina list_task" to review saved tasks.
+     *   5. Use "dreamina user_credit" to check the current account credit balance.
+     * 
+     * Tips:
+     *   Run "dreamina <subcommand> -h" to view detailed help for any subcommand.
+     *   Login now uses OAuth Device Flow and prints verification_uri, user_code, and device_code in the terminal.
+     *   All generation operations consume credits.
+     *   Seedance 2.0 family is a flagship video generation model family and is a strong choice when output quality matters most.
+     * 
+     * Built-in Commands:
+     *   help                 Help about any command
+     *   list_task            List saved tasks with status and result summary
+     *   login                Log in locally with OAuth Device Flow before using task and account commands
+     *   logout               Clear the local OAuth login state
+     *   query_result         Query the current result of an async generation task
+     *   relogin              Clear the local OAuth login state and force a fresh OAuth login
+     *   session              Manage sessions (create/list/search/rename/delete)
+     *   user_credit          Show the current user's remaining credit balance
+     *   version              Print build version and commit information
+     * 
+     * 
+     * Generator Commands:
+     *   frames2video         Submit a Dreamina first-last-frames video task
+     *   image2image          Submit a Dreamina image-to-image task
+     *   image2video          Animate one image into video; use multiframe2video for multi-image stories
+     *   image_upscale        Submit a Dreamina image upscale task
+     *   multiframe2video     Create a coherent video story from multiple images
+     *   multimodal2video     Dreamina flagship video mode (全能参考 / formerly ref2video) with all-around references and Seedance 2.0
+     *   text2image           Submit a Dreamina text-to-image task
+     *   text2video           Submit a Dreamina text-to-video task
+     * 
+     * 
+     * Examples:
+     *   dreamina login
+     *   dreamina login --headless
+     *   dreamina login checklogin --device_code=<device_code> --poll=30
+     *   dreamina logout
+     *   dreamina relogin
+     *   dreamina user_credit
+     *   dreamina list_task --gen_status=success
+     *   dreamina query_result --submit_id=550e8400-e29b-41d4-a716-446655440000
+     *   dreamina text2image --prompt="a cat portrait" --ratio=1:1 --resolution_type=2k
+     * </pre>
      */
     public DreaminaCliResult help() {
         return invoke(DreaminaCliSubcommands.Builtin.HELP, Collections.emptyList());
@@ -188,8 +247,23 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina version} 查询本地 CLI 版本信息（通常为 JSON）。
-     *
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina version -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina version [flags]
+     * 
+     * Print build version and commit information
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for version
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina version
+     * </pre>
      */
     public DreaminaCliResult version() {
         return invoke(DreaminaCliSubcommands.Account.VERSION, Collections.emptyList());
@@ -197,8 +271,23 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina user_credit} 查询与用户额度相关的 CLI 原始输出。
-     *
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina user_credit -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina user_credit [flags]
+     * 
+     * Query the current logged-in user's remaining Dreamina credits.
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for user_credit
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina user_credit
+     * </pre>
      */
     public DreaminaCliResult userCredit() {
         return invoke(DreaminaCliSubcommands.Account.USER_CREDIT, Collections.emptyList());
@@ -215,9 +304,29 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina login}，并追加官方支持的后缀参数（如 {@code --debug}、{@code --headless}）。
-     *
-     * @param additionalRawArgs CLI 片段列表，每项为单个 argv；null 视作空列表
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina login -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina login [flags]
+     * 
+     * Reuse the current local OAuth login state when it is still valid; otherwise start OAuth Device Flow.
+     * By default the CLI prints verification_uri, user_code, and device_code, then waits for authorization to complete.
+     * With --headless, the CLI prints the authorization material and exits without polling checklogin.
+     * The legacy browser callback and manual-import login flow are no longer used.
+     * 
+     * 
+     * Flags:
+     *       --headless   print OAuth authorization material and exit without polling checklogin
+     *   -h, --help       help for login
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina login
+     *   dreamina login --headless
+     *   dreamina login checklogin --device_code=<device_code> --poll=30
+     * </pre>
      */
     public DreaminaCliResult login(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Account.LOGIN, additionalRawArgs);
@@ -263,10 +372,28 @@ public class DreaminaCliExecutor {
 
     /**
      * 同上，并允许附加官方 flag（如将来 CLI 扩展的调试开关）。
-     *
-     * @param deviceCode        设备码；不得为 null
-     * @param pollSeconds       轮询秒数；负值将抛 {@link IllegalArgumentException}
-     * @param additionalRawArgs 额外 argv；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina login checklogin -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina login checklogin [flags]
+     * 
+     * Check the authorization result for a prior headless OAuth Device Flow login.
+     * Pass the device_code printed by "dreamina login --headless" or "dreamina relogin --headless".
+     * --poll=N waits for up to N seconds; --poll=0 checks only once.
+     * 
+     * 
+     * Flags:
+     *       --device_code string   device code printed by a prior headless OAuth login
+     *   -h, --help                 help for checklogin
+     *       --poll int             wait for up to N seconds before timing out; 0 checks once
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina login checklogin --device_code=<device_code>
+     *   dreamina login checklogin --device_code=<device_code> --poll=30
+     * </pre>
      */
     public DreaminaCliResult checkLogin(String deviceCode, int pollSeconds, List<String> additionalRawArgs) {
         Objects.requireNonNull(deviceCode, "deviceCode");
@@ -295,9 +422,23 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina logout}，可附加额外原生参数。
-     *
-     * @param additionalRawArgs CLI 后缀参数，可为 null
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina logout -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina logout [flags]
+     * 
+     * Remove the local OAuth login state without touching tasks or config.
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for logout
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina logout
+     * </pre>
      */
     public DreaminaCliResult logout(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Account.LOGOUT, additionalRawArgs);
@@ -314,9 +455,27 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina relogin}，可附加额外原生参数。
-     *
-     * @param additionalRawArgs CLI 后缀参数，可为 null
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina relogin -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina relogin [flags]
+     * 
+     * Remove the local OAuth login state first, then force a fresh OAuth Device Flow login.
+     * By default the CLI prints verification_uri, user_code, and device_code, then waits for authorization to complete.
+     * With --headless, the CLI prints the authorization material and exits without polling checklogin.
+     * 
+     * 
+     * Flags:
+     *       --headless   print OAuth authorization material and exit without polling checklogin
+     *   -h, --help       help for relogin
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina relogin
+     *   dreamina relogin --headless
+     * </pre>
      */
     public DreaminaCliResult relogin(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Account.RELOGIN, additionalRawArgs);
@@ -333,13 +492,72 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina session}，并追加子命令级参数。
-     * <p>若仅需 {@code create/list/search/...} 中某一类操作，优先使用 {@link #sessionCreate(List)} 等显式方法。</p>
-     *
-     * @param additionalRawArgs CLI 后缀参数，可为 null
-     * @return 仅在进程零退出且无超时时返回；否则抛出统一的执行层异常
+     * <p>CLI 帮助（采集自本机 {@code dreamina session -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session [flags]
+     * 
+     * Manage Dreamina sessions (create, list, search, rename, delete).
+     * 
+     * A session is a container for organizing your creation history.
+     * All generator commands accept a --session=<id> flag to submit tasks into a specific session.
+     * 
+     * Available Commands:
+     *   create    Create a new session (auto-named or custom)
+     *   list      List your recent sessions (alias: ls)
+     *   search    Find a session ID by its name (alias: find)
+     *   rename    Change a session's name (alias: update)
+     *   delete    Delete a session (alias: rm)
+     * 
+     * Notes:
+     * - All session commands require login (run "dreamina login" first).
+     * - Session 0 is the default session. It cannot be renamed or deleted.
+     * - Deleting a session will safely move its history back to the default session.
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for session
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   # 1. Create a session
+     *   dreamina session create
+     *   dreamina session create "My Video Project"
+     * 
+     *   # 2. List sessions (default 30; user-specified -n is capped at 100)
+     *   dreamina session list
+     *   dreamina session ls -n 100
+     * 
+     *   # 3. Find a session by name
+     *   dreamina session search "Video"
+     * 
+     *   # 4. Rename a session
+     *   dreamina session rename 10086 "New Project Name"
+     * 
+     *   # 5. Delete a session
+     *   dreamina session rm 10086
+     * </pre>
      */
     public DreaminaCliResult session(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Account.SESSION, additionalRawArgs);
+    }
+
+    /**
+     * {@link #session()} 的结构化视图：无子命令时 CLI 打印 session 子命令帮助（纯文本，见 {@link DreaminaCliResponse#getCombinedText()}）。
+     */
+    public DreaminaCliResponse<DreaminaHelp> sessionInfo() {
+        return structuredPayloadMapper.mapHelp(DreaminaCliSubcommands.Account.SESSION, session());
+    }
+
+    /**
+     * {@link #session(List)} 的结构化视图（如 {@code dreamina session -h}）。
+     *
+     * @param additionalRawArgs 透传到 CLI 的 flag
+     */
+    public DreaminaCliResponse<DreaminaHelp> sessionInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapHelp(DreaminaCliSubcommands.Account.SESSION, session(additionalRawArgs));
     }
 
     /**
@@ -351,8 +569,31 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina session create}；创建参数（名称、模型等）以官方 CLI 为准，通过 {@code additionalRawArgs} 传入。
-     *
-     * @param additionalRawArgs 子命令 {@code create} 之后的 flag/位置参数；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina session create -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session create [name] [flags]
+     * 
+     * Create a new session.
+     * 
+     * Args:
+     * - name (optional): session name. If omitted, the backend generates a default name like "新对话 01-04 10:30".
+     * 
+     * Notes:
+     * - name must be 1-50 characters after trimming spaces.
+     * 
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for create
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina session create
+     *   dreamina session create "我的视频项目"
+     * </pre>
      */
     public DreaminaCliResult sessionCreate(List<String> additionalRawArgs) {
         return runSessionSub(DreaminaCliSubcommands.SessionSub.CREATE, null, null, additionalRawArgs);
@@ -367,8 +608,35 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina session list}；筛选/分页等通过 {@code additionalRawArgs} 扩展。
-     *
-     * @param additionalRawArgs 可选 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina session list -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session list [flags]
+     * 
+     * List recent sessions.
+     * 
+     * By default it requests and shows the latest 30 sessions from the backend, ordered by pinned first and then updated time descending.
+     * If you pass -n/--max-count, the CLI requests that many sessions from the backend.
+     * User-specified values are capped at 100.
+     * 
+     * Output:
+     * - Table columns: ID, NAME, PINNED, UPDATED_AT
+     * - UPDATED_AT is formatted as local time: YYYY-MM-DD HH:MM
+     * 
+     * 
+     * 
+     * Flags:
+     *   -h, --help            help for list
+     *   -n, --max-count int   maximum number of sessions to display (default 30)
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina session list
+     *   dreamina session list -n 5
+     *   dreamina session list -n 100
+     * </pre>
      */
     public DreaminaCliResult sessionList(List<String> additionalRawArgs) {
         return runSessionSub(DreaminaCliSubcommands.SessionSub.LIST, null, null, additionalRawArgs);
@@ -395,9 +663,27 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina session search}。若 {@code searchTerm} 非空，在 {@code search} 子命令后追加一个 argv（常见为关键词；若官方仅支持 flag，可传 null 并在 {@code additionalRawArgs} 中写全量参数）。
-     *
-     * @param searchTerm          可选检索词；null 或空白则仅依赖 {@code additionalRawArgs}
-     * @param additionalRawArgs 其它 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina session search -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session search <name> [flags]
+     * 
+     * Search sessions by name.
+     * 
+     * The CLI requests the first 100 sessions from the backend and matches records whose name contains the input string. Matching is case-sensitive.
+     * 
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for search
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina session search "视频"
+     *   dreamina session search "我的年度总结"
+     * </pre>
      */
     public DreaminaCliResult sessionSearch(String searchTerm, List<String> additionalRawArgs) {
         return runSessionSub(DreaminaCliSubcommands.SessionSub.SEARCH, searchTerm, null, additionalRawArgs);
@@ -422,10 +708,34 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina session rename <sessionId> <newName>}（后两项为独立 argv，含空格时由 Commons Exec 处理转义）。
-     *
-     * @param sessionId         当前会话标识；不得为 null/空白
-     * @param newName           新显示名或标识；不得为 null/空白
-     * @param additionalRawArgs 其它 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina session rename -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session rename <session_id> <new_name> [flags]
+     * 
+     * Rename a session.
+     * 
+     * This command only exposes renaming. Pin/unpin is intentionally not exposed in CLI.
+     * 
+     * Args:
+     * - session_id: the target session ID
+     * - new_name: the new session name (1-50 characters)
+     * 
+     * Notes:
+     * - Session 0 is the default session and cannot be renamed.
+     * - Negative session IDs are invalid.
+     * 
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for rename
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina session rename 10086 "2024年度宣传片"
+     * </pre>
      */
     public DreaminaCliResult sessionRename(String sessionId, String newName, List<String> additionalRawArgs) {
         Objects.requireNonNull(sessionId, "sessionId");
@@ -463,6 +773,30 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina session delete <sessionId>}。
+     * <p>CLI 帮助（采集自本机 {@code dreamina session delete -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina session delete <session_id> [flags]
+     * 
+     * Delete a session.
+     * 
+     * Notes:
+     * - Session 0 is the default session and cannot be deleted.
+     * - Negative session IDs are invalid.
+     * - This operation is safe. The backend performs a soft delete and will move related history records back to the default session.
+     * 
+     * 
+     * 
+     * Flags:
+     *   -h, --help   help for delete
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina session delete 10085
+     *   dreamina session rm 10085
+     * </pre>
      */
     public DreaminaCliResult sessionDelete(String sessionId) {
         return sessionDelete(sessionId, Collections.emptyList());
@@ -538,9 +872,39 @@ public class DreaminaCliExecutor {
 
     /**
      * 同上，附带额外原生参数片段（每项按单个 argv 传入，不做 shell 拆分）。
-     *
-     * @param prompt            必填提示词
-     * @param additionalRawArgs CLI 后缀参数，可为 null 视作空列表
+     * <p>CLI 帮助（采集自本机 {@code dreamina text2image -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina text2image [flags]
+     * 
+     * Submit a Dreamina text-to-image task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - model_version: 3.0, 3.1, 4.0, 4.1, 4.5, 4.6, 5.0
+     * - ratio: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+     * - 3.0/3.1 -> resolution_type 1k or 2k
+     * - 4.0/4.1/4.5/4.6/5.0 -> resolution_type 2k or 4k
+     * 
+     * Notes:
+     * - omit --model_version to use the default model
+     * - omit --resolution_type to use the model default
+     * 
+     * 
+     * Flags:
+     *       --prompt string            generation prompt
+     *       --session int              session id (default 0 "默认对话") 
+     *       --ratio string             supported values: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+     *       --resolution_type string   supported values by model: 3.0/3.1 -> 1k or 2k; 4.0/4.1/4.5/4.6/5.0 -> 2k or 4k; omit to use the model default
+     *       --model_version string     supported values: 3.0, 3.1, 4.0, 4.1, 4.5, 4.6, 5.0
+     *       --poll int                 submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                     help for text2image
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina text2image --prompt="a cat portrait" --ratio=1:1 --resolution_type=2k
+     * </pre>
      */
     public DreaminaCliResult text2Image(String prompt, List<String> additionalRawArgs) {
         Objects.requireNonNull(prompt, "prompt");
@@ -564,11 +928,41 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina image2image}：图生图，需传入参考图列表与编辑提示词。
-     * <p>参考图写法与官方 CLI 一致，通常为逗号分隔的本地路径列表（1–10 张）。</p>
-     *
-     * @param imagesCsv         {@code --images=} 取值，必填
-     * @param prompt            {@code --prompt=} 取值，必填
-     * @param additionalRawArgs 其它 flag（如 {@code --model_version=}、{@code --poll=}），可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina image2image -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina image2image [flags]
+     * 
+     * Upload 1 to 10 local images, then submit a Dreamina image-to-image task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - model_version: 4.0, 4.1, 4.5, 4.6, 5.0
+     * - ratio: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+     * - resolution_type: 2k, 4k
+     * 
+     * Notes:
+     * - 1k is not supported for image2image
+     * - omit --model_version to use the default model
+     * - omit --resolution_type to use the model default
+     * - 一次最多上传十张图片，否则可能导致生图失败
+     * 
+     * 
+     * Flags:
+     *       --images strings           local input image paths
+     *       --prompt string            edit prompt
+     *       --session int              session id (default 0 "默认对话") 
+     *       --ratio string             supported values: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+     *       --resolution_type string   supported values: 2k, 4k; omit to use the model default
+     *       --model_version string     supported values: 4.0, 4.1, 4.5, 4.6, 5.0
+     *       --poll int                 submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                     help for image2image
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina image2image --images ./input.png --prompt="turn into watercolor"
+     * </pre>
      */
     public DreaminaCliResult image2Image(String imagesCsv, String prompt, List<String> additionalRawArgs) {
         Objects.requireNonNull(imagesCsv, "imagesCsv");
@@ -600,9 +994,32 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina image_upscale}；具体必填参数由调用方在 {@code additionalRawArgs} 中给出。
-     * <p>执行器仅负责子命令与通用执行语义，避免对上游模型参数做强假设。</p>
-     *
-     * @param additionalRawArgs CLI 参数列表；若为 null 则仅执行子命令本身（通常不足以完成放大，仅供参考）
+     * <p>CLI 帮助（采集自本机 {@code dreamina image_upscale -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina image_upscale [flags]
+     * 
+     * Upload one local image, then submit a Dreamina image upscale task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - resolution_type: 2k, 4k, 8k
+     * - 2k is available to non-VIP users
+     * - 4k and 8k require VIP
+     * 
+     * 
+     * Flags:
+     *       --image string             local input image path
+     *       --session int              session id (default 0 "默认对话") 
+     *       --resolution_type string   supported values: 2k, 4k, 8k; 4k and 8k require VIP
+     *       --poll int                 submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                     help for image_upscale
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina image_upscale --image=./input.png --resolution_type=4k
+     * </pre>
      */
     public DreaminaCliResult imageUpscale(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Image.IMAGE_UPSCALE, additionalRawArgs);
@@ -634,9 +1051,42 @@ public class DreaminaCliExecutor {
 
     /**
      * 文生视频并附加额外原生参数（如 {@code --duration=}、{@code --model_version=}、{@code --poll=}）。
-     *
-     * @param prompt            必填提示词
-     * @param additionalRawArgs CLI 后缀参数，可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina text2video -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina text2video [flags]
+     * 
+     * Submit a Dreamina text-to-video task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - model_version: seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     * - ratio: 1:1, 3:4, 16:9, 4:3, 9:16, 21:9
+     * - seedance2.0_vip -> video_resolution 720p or 1080p; duration 4-15s
+     * - all other models -> video_resolution 720p; duration 4-15s
+     * 
+     * Notes:
+     * - default model_version: seedance2.0fast
+     * - omit --video_resolution to use the model default
+     * - omit --ratio to use the default ratio
+     * - 部分高内容安全风险模型在首次使用前，可能需要先在 Dreamina Web 端完成授权确认。若返回 AigcComplianceConfirmationRequired，请先完成授权后重试。
+     * 
+     * 
+     * Flags:
+     *       --prompt string             generation prompt
+     *       --session int               session id (default 0 "默认对话") 
+     *       --duration int              video duration in seconds; supported range: 4-15 (default 5)
+     *       --ratio string              supported values: 1:1, 3:4, 16:9, 4:3, 9:16, 21:9
+     *       --video_resolution string   supported values by model: seedance2.0_vip -> 720p or 1080p; all other models -> 720p
+     *       --model_version string      supported values: seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip; default: seedance2.0fast
+     *       --poll int                  submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                      help for text2video
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina text2video --prompt="a cat running" --duration=5
+     * </pre>
      */
     public DreaminaCliResult text2video(String prompt, List<String> additionalRawArgs) {
         Objects.requireNonNull(prompt, "prompt");
@@ -666,10 +1116,43 @@ public class DreaminaCliExecutor {
 
     /**
      * 调用 {@code dreamina image2video}：单张参考图驱动视频。
-     *
-     * @param imagePath         {@code --image=} 本地路径，必填
-     * @param prompt            {@code --prompt=}；若为空或空白则省略该参数（与官方可选语义一致）
-     * @param additionalRawArgs 其它 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina image2video -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina image2video [flags]
+     * 
+     * Upload one local image, then submit a Dreamina image-to-video task. For multi-image storytelling, use multiframe2video; for full-reference mixed-media generation, use multimodal2video. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - basic usage: --image + --prompt
+     * - advanced controls: set any of --duration, --video_resolution, or --model_version
+     * - advanced model_version values: 3.0, 3.0fast, 3.0pro, 3.0_fast, 3.0_pro, 3.5pro, 3.5_pro, seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     * - seedance2.0_vip -> video_resolution 720p or 1080p
+     * - all other models -> video_resolution 720p
+     * - ratio is inferred from the input image and is not set on this command
+     * 
+     * Notes:
+     * - omit advanced controls to use the default image-to-video path
+     * - duration, model_version, and video_resolution must be provided in a supported combination
+     * - 部分高内容安全风险模型在首次使用前，可能需要先在 Dreamina Web 端完成授权确认。若返回 AigcComplianceConfirmationRequired，请先完成授权后重试。
+     * 
+     * 
+     * Flags:
+     *       --image string              local first-frame image path
+     *       --prompt string             generation prompt
+     *       --duration int              advanced controls only; supported duration ranges by model: 3.0/3.0fast/3.0pro -> 3-10, 3.5pro -> 4-12, seedance2.0 family -> 4-15 (default 5)
+     *       --video_resolution string   advanced controls only; supported values by model: seedance2.0_vip -> 720p or 1080p; all other models -> 720p
+     *       --model_version string      advanced controls only; supported values: 3.0, 3.0fast, 3.0pro, 3.0_fast, 3.0_pro, 3.5pro, 3.5_pro, seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     *       --session int               session id (default 0 "默认对话") 
+     *       --poll int                  submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                      help for image2video
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina image2video --image=./first.png --prompt="camera push in"
+     * </pre>
      */
     public DreaminaCliResult image2video(String imagePath, String prompt, List<String> additionalRawArgs) {
         Objects.requireNonNull(imagePath, "imagePath");
@@ -702,6 +1185,44 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina frames2video}：首尾帧过渡；必填参数放在 {@code additionalRawArgs}（如 {@code --first=} / {@code --last=}）。
+     * <p>CLI 帮助（采集自本机 {@code dreamina frames2video -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina frames2video [flags]
+     * 
+     * Upload two local images as first and last frames, then submit a Dreamina video generation task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - model_version: 3.0, 3.5pro, seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     * - seedance2.0_vip -> video_resolution 720p or 1080p; duration 4-15s
+     * - 3.0 -> video_resolution 720p; duration 3-10s
+     * - 3.5pro -> video_resolution 720p; duration 4-12s
+     * - all other seedance2.0 models -> video_resolution 720p; duration 4-15s
+     * 
+     * Notes:
+     * - ratio is inferred from the first frame image size
+     * - default model_version: seedance2.0fast
+     * - omit --video_resolution to use the model default
+     * - 部分高内容安全风险模型在首次使用前，可能需要先在 Dreamina Web 端完成授权确认。若返回 AigcComplianceConfirmationRequired，请先完成授权后重试。
+     * 
+     * 
+     * Flags:
+     *       --first string              local first-frame image path
+     *       --last string               local last-frame image path
+     *       --prompt string             generation prompt
+     *       --session int               session id (default 0 "默认对话") 
+     *       --duration int              video duration in seconds; supported ranges: 3.0 -> 3-10, 3.5pro -> 4-12, seedance2.0 family -> 4-15 (default 5)
+     *       --video_resolution string   supported values by model: seedance2.0_vip -> 720p or 1080p; all other models -> 720p
+     *       --model_version string      supported values: 3.0, 3.5pro, seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip; default: seedance2.0fast
+     *       --poll int                  submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                      help for frames2video
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina frames2video --first=./start.png --last=./end.png --prompt="season changes"
+     * </pre>
      */
     public DreaminaCliResult frames2video(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Video.FRAMES2VIDEO, additionalRawArgs);
@@ -727,6 +1248,44 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina multiframe2video}：多分镜图叙事；必填参数放在 {@code additionalRawArgs}。
+     * <p>CLI 帮助（采集自本机 {@code dreamina multiframe2video -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina multiframe2video [flags]
+     * 
+     * Upload multiple local images, then submit a Dreamina intelligent multi-frame video task for coherent visual storytelling. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - inputs: 2-20 images
+     * - exactly 2 images: use shorthand --prompt and optional --duration
+     * - 3+ images: repeat --transition-prompt once per transition segment to describe how one frame evolves into the next
+     * - repeat --transition-duration once per transition segment, or omit it to default each segment to 3 seconds
+     * 
+     * Notes:
+     * - designed for multi-image story generation, not full multimodal editing
+     * - for N images, the transition count is N-1
+     * - ratio is inferred from the first image
+     * - model_version and video_resolution overrides are not supported by this command
+     * - each duration segment is limited to [0.5, 8] seconds and total duration must be >= 2
+     * 
+     * 
+     * Flags:
+     *       --images strings                    local reference image paths
+     *       --prompt string                     shorthand prompt for exactly 2 images
+     *       --duration float                    shorthand transition duration in seconds for exactly 2 images; backend clamps each segment to [0.5, 8] and requires total duration >= 2 (default 3)
+     *       --transition-prompt stringArray     repeat once per transition segment; for N images provide N-1 prompts
+     *       --transition-duration stringArray   repeat once per transition segment in seconds; for N images provide N-1 durations, or omit to default each segment to 3
+     *       --session int                       session id (default 0 "默认对话") 
+     *       --poll int                          submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                              help for multiframe2video
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina multiframe2video --images ./a.png,./b.png --prompt="character turns around"
+     *   dreamina multiframe2video --images ./a.png,./b.png,./c.png --transition-prompt="turn from A to B" --transition-prompt="turn from B to C"
+     * </pre>
      */
     public DreaminaCliResult multiframe2video(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Video.MULTIFRAME2VIDEO, additionalRawArgs);
@@ -752,6 +1311,50 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina multimodal2video}：多模态合成；必填参数放在 {@code additionalRawArgs}。
+     * <p>CLI 帮助（采集自本机 {@code dreamina multimodal2video -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina multimodal2video [flags]
+     * 
+     * Upload local images, videos, and audio, then submit Dreamina's flagship multimodal video generation mode. This corresponds to the "全能参考" (All-around reference) feature on the web interface (formerly known as ref2video). This is the strongest video generation mode currently exposed in the CLI, supports all-around references, and supports the Seedance 2.0 family (flag values: seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip). The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+     * 
+     * Supported combinations:
+     * - inputs: any mix of --image, --video, --audio
+     * - at least one --image or --video is required
+     * - audio inputs must be 2-15 seconds
+     * - model_version: seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     * - ratio: 1:1, 3:4, 16:9, 4:3, 9:16, 21:9
+     * - seedance2.0_vip -> video_resolution 720p or 1080p
+     * - all other models -> video_resolution 720p
+     * - duration: 4-15s
+     * 
+     * Notes:
+     * - local files are uploaded automatically before submit
+     * - input limits: image<=9, video<=3, audio<=3
+     * - 部分高内容安全风险模型在首次使用前，可能需要先在 Dreamina Web 端完成授权确认。若返回 AigcComplianceConfirmationRequired，请先完成授权后重试。
+     * 
+     * 
+     * Flags:
+     *       --image stringArray         repeat for each local input image path
+     *       --video stringArray         repeat for each local input video path
+     *       --audio stringArray         repeat for each local input audio path
+     *       --prompt string             optional multimodal edit prompt
+     *       --duration int              video duration in seconds; supported range: 4-15 (default 5)
+     *       --ratio string              supported values: 1:1, 3:4, 16:9, 4:3, 9:16, 21:9
+     *       --video_resolution string   supported values by model: seedance2.0_vip -> 720p or 1080p; all other models -> 720p
+     *       --model_version string      supported values: seedance2.0, seedance2.0fast, seedance2.0_vip, seedance2.0fast_vip
+     *       --session int               session id (default 0 "默认对话") 
+     *       --poll int                  submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+     *   -h, --help                      help for multimodal2video
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina multimodal2video --image ./input.png --prompt="turn this into a cinematic shot"
+     *   dreamina multimodal2video --image ./input.png --audio ./music.mp3 --model_version=seedance2.0fast --duration=5
+     *   dreamina multimodal2video --image ./input.png --video ./ref.mp4 --audio ./music.mp3 --model_version=seedance2.0fast --duration=5
+     * </pre>
      */
     public DreaminaCliResult multimodal2video(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Video.MULTIMODAL2VIDEO, additionalRawArgs);
@@ -783,9 +1386,25 @@ public class DreaminaCliExecutor {
 
     /**
      * 同上，并追加额外原生参数。
-     *
-     * @param submitId          提交编号；不得为 null
-     * @param additionalRawArgs 扩展 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina query_result -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina query_result [flags]
+     * 
+     * Query one async task by submit_id.
+     * 
+     * 
+     * Flags:
+     *       --download_dir string   download result media into the target directory
+     *   -h, --help                  help for query_result
+     *       --submit_id string      task submit_id
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina query_result --submit_id=3f6eb41f425d23a3
+     * </pre>
      */
     public DreaminaCliResult queryResult(String submitId, List<String> additionalRawArgs) {
         Objects.requireNonNull(submitId, "submitId");
@@ -817,8 +1436,29 @@ public class DreaminaCliExecutor {
 
     /**
      * {@code dreamina list_task} 并附加筛选参数（如 {@code --gen_status=success}）。
-     *
-     * @param additionalRawArgs 官方支持的 flag；可为 null
+     * <p>CLI 帮助（采集自本机 {@code dreamina list_task -h}）：</p>
+     * <pre>
+     * Usage:
+     *   dreamina list_task [flags]
+     * 
+     * List tasks saved for the current logged-in user.
+     * 
+     * 
+     * Flags:
+     *       --gen_status string      filter by gen_status
+     *       --gen_task_type string   filter by gen_task_type
+     *   -h, --help                   help for list_task
+     *       --limit int              max number of tasks to return (default 20)
+     *       --offset int             offset for pagination
+     *       --submit_id string       filter by submit_id
+     * 
+     * Global Flags:
+     *       --version   print build version information
+     * 
+     * Examples:
+     *   dreamina list_task
+     *   dreamina list_task --gen_status=success
+     * </pre>
      */
     public DreaminaCliResult listTask(List<String> additionalRawArgs) {
         return invoke(DreaminaCliSubcommands.Task.LIST_TASK, additionalRawArgs);
@@ -836,33 +1476,30 @@ public class DreaminaCliExecutor {
     }
 
     // -------------------------------------------------------------------------
-    // 结构化便捷封装（在保留原始 {@link DreaminaCliResult} 之上提供强类型视图）
+    // 结构化便捷封装（所见即所得：{@link DreaminaCliResponse}）
     // -------------------------------------------------------------------------
 
     /**
      * {@link #version()} 的结构化视图。
      *
-     * @return 绑定原始快照与 {@link DreaminaVersionResult}
+     * @return 绑定原始快照与 {@link DreaminaVersion}
      */
-    public DreaminaCliTypedResult<DreaminaVersionResult> versionInfo() {
-        DreaminaCliResult raw = version();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapVersion(raw));
+    public DreaminaCliResponse<DreaminaVersion> versionInfo() {
+        return structuredPayloadMapper.mapVersion(version());
     }
 
     /**
      * {@link #userCredit()} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaUserCreditResult> userCreditInfo() {
-        DreaminaCliResult raw = userCredit();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapUserCredit(raw));
+    public DreaminaCliResponse<DreaminaUserCredit> userCreditInfo() {
+        return structuredPayloadMapper.mapUserCredit(userCredit());
     }
 
     /**
      * {@link #help()} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaHelpResult> helpInfo() {
-        DreaminaCliResult raw = help();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapHelp(null, raw));
+    public DreaminaCliResponse<DreaminaHelp> helpInfo() {
+        return structuredPayloadMapper.mapHelp(null, help());
     }
 
     /**
@@ -870,9 +1507,8 @@ public class DreaminaCliExecutor {
      *
      * @param subcommand 目标子命令名
      */
-    public DreaminaCliTypedResult<DreaminaHelpResult> helpInfo(String subcommand) {
-        DreaminaCliResult raw = help(subcommand);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapHelp(subcommand, raw));
+    public DreaminaCliResponse<DreaminaHelp> helpInfo(String subcommand) {
+        return structuredPayloadMapper.mapHelp(subcommand, help(subcommand));
     }
 
     /**
@@ -881,17 +1517,72 @@ public class DreaminaCliExecutor {
      * @param subcommand        目标子命令名
      * @param additionalRawArgs 追加原生参数
      */
-    public DreaminaCliTypedResult<DreaminaHelpResult> helpInfo(String subcommand, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = help(subcommand, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapHelp(subcommand, raw));
+    public DreaminaCliResponse<DreaminaHelp> helpInfo(String subcommand, List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapHelp(subcommand, help(subcommand, additionalRawArgs));
+    }
+
+    /**
+     * {@link #login()} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaLogin> loginInfo() {
+        return structuredPayloadMapper.mapLogin(login());
+    }
+
+    /**
+     * {@link #login(List)} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaLogin> loginInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapLogin(login(additionalRawArgs));
+    }
+
+    /**
+     * {@link #logout()} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaLogout> logoutInfo() {
+        return structuredPayloadMapper.mapLogout(logout());
+    }
+
+    /**
+     * {@link #logout(List)} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaLogout> logoutInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapLogout(logout(additionalRawArgs));
+    }
+
+    /**
+     * {@link #relogin()} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaRelogin> reloginInfo() {
+        return structuredPayloadMapper.mapRelogin(relogin());
+    }
+
+    /**
+     * {@link #relogin(List)} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaRelogin> reloginInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapRelogin(relogin(additionalRawArgs));
+    }
+
+    /**
+     * {@link #checkLogin(String, int)} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaCheckLogin> checkLoginInfo(String deviceCode, int pollSeconds) {
+        return structuredPayloadMapper.mapCheckLogin(checkLogin(deviceCode, pollSeconds));
+    }
+
+    /**
+     * {@link #checkLogin(String, int, List)} 的结构化视图。
+     */
+    public DreaminaCliResponse<DreaminaCheckLogin> checkLoginInfo(
+        String deviceCode, int pollSeconds, List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapCheckLogin(checkLogin(deviceCode, pollSeconds, additionalRawArgs));
     }
 
     /**
      * {@link #loginHeadless()} 的结构化视图：可能是 Device Flow JSON，也可能仅为「复用本地 OAuth」提示文本。
      */
-    public DreaminaCliTypedResult<DreaminaLoginResult> loginHeadlessInfo() {
-        DreaminaCliResult raw = loginHeadless();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapLogin(raw));
+    public DreaminaCliResponse<DreaminaLogin> loginHeadlessInfo() {
+        return structuredPayloadMapper.mapLogin(loginHeadless());
     }
 
     /**
@@ -899,25 +1590,22 @@ public class DreaminaCliExecutor {
      *
      * @param additionalRawArgs headless 后缀参数
      */
-    public DreaminaCliTypedResult<DreaminaLoginResult> loginHeadlessInfo(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = loginHeadless(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapLogin(raw));
+    public DreaminaCliResponse<DreaminaLogin> loginHeadlessInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapLogin(loginHeadless(additionalRawArgs));
     }
 
     /**
      * 显式解析 Device Flow JSON（若 stdout 非 JSON 则字段为空）。
      */
-    public DreaminaCliTypedResult<DreaminaDeviceLoginResult> deviceLoginMaterial(DreaminaCliResult loginStdOutSnapshot) {
-        DreaminaDeviceLoginResult dto = structuredPayloadMapper.mapDeviceLogin(loginStdOutSnapshot);
-        return DreaminaCliTypedResult.of(loginStdOutSnapshot, dto);
+    public DreaminaCliResponse<DreaminaDeviceLogin> deviceLoginMaterial(DreaminaCliResult loginStdOutSnapshot) {
+        return structuredPayloadMapper.mapDeviceLogin(loginStdOutSnapshot);
     }
 
     /**
      * {@link #sessionList()} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionListResult> sessionListInfo() {
-        DreaminaCliResult raw = sessionList();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionList(raw));
+    public DreaminaCliResponse<DreaminaSessionList> sessionListInfo() {
+        return structuredPayloadMapper.mapSessionList(sessionList());
     }
 
     /**
@@ -925,9 +1613,8 @@ public class DreaminaCliExecutor {
      *
      * @param additionalRawArgs 透传到 CLI 的 flag
      */
-    public DreaminaCliTypedResult<DreaminaSessionListResult> sessionListInfo(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionList(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionList(raw));
+    public DreaminaCliResponse<DreaminaSessionList> sessionListInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapSessionList(sessionList(additionalRawArgs));
     }
 
     /**
@@ -935,9 +1622,8 @@ public class DreaminaCliExecutor {
      *
      * @param additionalRawArgs 透传到 CLI 的 flag，如 {@code -n=100}
      */
-    public DreaminaCliTypedResult<DreaminaSessionListResult> sessionLsInfo(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionLs(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionList(raw));
+    public DreaminaCliResponse<DreaminaSessionList> sessionLsInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapSessionList(sessionLs(additionalRawArgs));
     }
 
     /**
@@ -945,35 +1631,31 @@ public class DreaminaCliExecutor {
      *
      * @param searchTerm 检索关键字；可为 null（等同底层 CLI 语义）
      */
-    public DreaminaCliTypedResult<DreaminaSessionSearchResult> sessionSearchInfo(String searchTerm) {
-        DreaminaCliResult raw = sessionSearch(searchTerm);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionSearch(searchTerm, raw));
+    public DreaminaCliResponse<DreaminaSessionSearch> sessionSearchInfo(String searchTerm) {
+        return structuredPayloadMapper.mapSessionSearch(searchTerm, sessionSearch(searchTerm));
     }
 
     /**
      * {@link #sessionSearch(String, List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionSearchResult> sessionSearchInfo(
+    public DreaminaCliResponse<DreaminaSessionSearch> sessionSearchInfo(
         String searchTerm, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionSearch(searchTerm, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionSearch(searchTerm, raw));
+        return structuredPayloadMapper.mapSessionSearch(searchTerm, sessionSearch(searchTerm, additionalRawArgs));
     }
 
     /**
      * {@link #sessionFind(String, List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionSearchResult> sessionFindInfo(
+    public DreaminaCliResponse<DreaminaSessionSearch> sessionFindInfo(
         String searchTerm, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionFind(searchTerm, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionSearch(searchTerm, raw));
+        return structuredPayloadMapper.mapSessionSearch(searchTerm, sessionFind(searchTerm, additionalRawArgs));
     }
 
     /**
      * {@link #sessionCreate()} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionCreateInfo() {
-        DreaminaCliResult raw = sessionCreate();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+    public DreaminaCliResponse<DreaminaSessionMutation> sessionCreateInfo() {
+        return structuredPayloadMapper.mapSessionMutation(sessionCreate());
     }
 
     /**
@@ -981,59 +1663,52 @@ public class DreaminaCliExecutor {
      *
      * @param additionalRawArgs 会话名称或其它官方 flag
      */
-    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionCreateInfo(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionCreate(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+    public DreaminaCliResponse<DreaminaSessionMutation> sessionCreateInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapSessionMutation(sessionCreate(additionalRawArgs));
     }
 
     /**
      * {@link #sessionRename(String, String)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionRenameInfo(String sessionId, String newName) {
-        DreaminaCliResult raw = sessionRename(sessionId, newName);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+    public DreaminaCliResponse<DreaminaSessionMutation> sessionRenameInfo(String sessionId, String newName) {
+        return structuredPayloadMapper.mapSessionMutation(sessionRename(sessionId, newName));
     }
 
     /**
      * {@link #sessionRename(String, String, List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionRenameInfo(
+    public DreaminaCliResponse<DreaminaSessionMutation> sessionRenameInfo(
         String sessionId, String newName, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionRename(sessionId, newName, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+        return structuredPayloadMapper.mapSessionMutation(sessionRename(sessionId, newName, additionalRawArgs));
     }
 
     /**
      * {@link #sessionUpdate(String, String, List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaSessionMutationResult> sessionUpdateInfo(
+    public DreaminaCliResponse<DreaminaSessionMutation> sessionUpdateInfo(
         String sessionId, String newName, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = sessionUpdate(sessionId, newName, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapSessionMutation(raw));
+        return structuredPayloadMapper.mapSessionMutation(sessionUpdate(sessionId, newName, additionalRawArgs));
     }
 
     /**
      * {@link #listTask()} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaTaskListResult> listTaskInfo() {
-        DreaminaCliResult raw = listTask();
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapTaskList(raw));
+    public DreaminaCliResponse<List<DreaminaTaskItem>> listTaskInfo() {
+        return structuredPayloadMapper.mapTaskList(listTask());
     }
 
     /**
      * {@link #listTask(List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaTaskListResult> listTaskInfo(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = listTask(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapTaskList(raw));
+    public DreaminaCliResponse<List<DreaminaTaskItem>> listTaskInfo(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapTaskList(listTask(additionalRawArgs));
     }
 
     /**
      * {@link #listTask(DreaminaListTaskRequest)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaTaskListResult> listTaskInfo(DreaminaListTaskRequest request) {
-        DreaminaCliResult raw = listTask(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapTaskList(raw));
+    public DreaminaCliResponse<List<DreaminaTaskItem>> listTaskInfo(DreaminaListTaskRequest request) {
+        return structuredPayloadMapper.mapTaskList(listTask(request));
     }
 
     /**
@@ -1041,33 +1716,29 @@ public class DreaminaCliExecutor {
      *
      * @param submitId 提交编号
      */
-    public DreaminaCliTypedResult<DreaminaQueryResult> queryResultInfo(String submitId) {
-        DreaminaCliResult raw = queryResult(submitId);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
+    public DreaminaCliResponse<DreaminaQueryResult> queryResultInfo(String submitId) {
+        return structuredPayloadMapper.mapQueryResult(queryResult(submitId));
     }
 
     /**
      * {@link #queryResult(String, List)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaQueryResult> queryResultInfo(String submitId, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = queryResult(submitId, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
+    public DreaminaCliResponse<DreaminaQueryResult> queryResultInfo(String submitId, List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapQueryResult(queryResult(submitId, additionalRawArgs));
     }
 
     /**
      * {@link #queryResult(DreaminaQueryResultRequest)} 的结构化视图。
      */
-    public DreaminaCliTypedResult<DreaminaQueryResult> queryResultInfo(DreaminaQueryResultRequest request) {
-        DreaminaCliResult raw = queryResult(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
+    public DreaminaCliResponse<DreaminaQueryResult> queryResultInfo(DreaminaQueryResultRequest request) {
+        return structuredPayloadMapper.mapQueryResult(queryResult(request));
     }
 
     /**
      * {@link #text2Image(String, List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> text2ImageSubmit(String prompt, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = text2Image(prompt, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> text2ImageSubmit(String prompt, List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(text2Image(prompt, additionalRawArgs));
     }
 
     /**
@@ -1076,18 +1747,16 @@ public class DreaminaCliExecutor {
      * @param request 文生图请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> text2ImageSubmit(DreaminaText2ImageRequest request) {
-        DreaminaCliResult raw = text2Image(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> text2ImageSubmit(DreaminaText2ImageRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(text2Image(request));
     }
 
     /**
      * {@link #image2Image(String, String, List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> image2ImageSubmit(
+    public DreaminaCliResponse<DreaminaGenerateSubmit> image2ImageSubmit(
         String imagesCsv, String prompt, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = image2Image(imagesCsv, prompt, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+        return structuredPayloadMapper.mapGenerateSubmit(image2Image(imagesCsv, prompt, additionalRawArgs));
     }
 
     /**
@@ -1096,17 +1765,15 @@ public class DreaminaCliExecutor {
      * @param request 图生图请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> image2ImageSubmit(DreaminaImage2ImageRequest request) {
-        DreaminaCliResult raw = image2Image(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> image2ImageSubmit(DreaminaImage2ImageRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(image2Image(request));
     }
 
     /**
      * {@link #imageUpscale(List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> imageUpscaleSubmit(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = imageUpscale(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> imageUpscaleSubmit(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(imageUpscale(additionalRawArgs));
     }
 
     /**
@@ -1115,17 +1782,15 @@ public class DreaminaCliExecutor {
      * @param request 图像超分请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> imageUpscaleSubmit(DreaminaImageUpscaleRequest request) {
-        DreaminaCliResult raw = imageUpscale(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> imageUpscaleSubmit(DreaminaImageUpscaleRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(imageUpscale(request));
     }
 
     /**
      * {@link #text2video(String, List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> text2VideoSubmit(String prompt, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = text2video(prompt, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> text2VideoSubmit(String prompt, List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(text2video(prompt, additionalRawArgs));
     }
 
     /**
@@ -1134,18 +1799,16 @@ public class DreaminaCliExecutor {
      * @param request 文生视频请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> text2VideoSubmit(DreaminaText2VideoRequest request) {
-        DreaminaCliResult raw = text2video(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> text2VideoSubmit(DreaminaText2VideoRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(text2video(request));
     }
 
     /**
      * {@link #image2video(String, String, List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> image2VideoSubmit(
+    public DreaminaCliResponse<DreaminaGenerateSubmit> image2VideoSubmit(
         String imagePath, String prompt, List<String> additionalRawArgs) {
-        DreaminaCliResult raw = image2video(imagePath, prompt, additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+        return structuredPayloadMapper.mapGenerateSubmit(image2video(imagePath, prompt, additionalRawArgs));
     }
 
     /**
@@ -1154,17 +1817,15 @@ public class DreaminaCliExecutor {
      * @param request 单图生视频请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> image2VideoSubmit(DreaminaImage2VideoRequest request) {
-        DreaminaCliResult raw = image2video(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> image2VideoSubmit(DreaminaImage2VideoRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(image2video(request));
     }
 
     /**
      * {@link #frames2video(List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> frames2VideoSubmit(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = frames2video(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> frames2VideoSubmit(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(frames2video(additionalRawArgs));
     }
 
     /**
@@ -1173,17 +1834,15 @@ public class DreaminaCliExecutor {
      * @param request 首尾帧视频请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> frames2VideoSubmit(DreaminaFrames2VideoRequest request) {
-        DreaminaCliResult raw = frames2video(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> frames2VideoSubmit(DreaminaFrames2VideoRequest request) {
+        return structuredPayloadMapper.mapGenerateSubmit(frames2video(request));
     }
 
     /**
      * {@link #multiframe2video(List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> multiframe2VideoSubmit(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = multiframe2video(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> multiframe2VideoSubmit(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(multiframe2video(additionalRawArgs));
     }
 
     /**
@@ -1192,18 +1851,16 @@ public class DreaminaCliExecutor {
      * @param request 多帧故事视频请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> multiframe2VideoSubmit(
+    public DreaminaCliResponse<DreaminaGenerateSubmit> multiframe2VideoSubmit(
         DreaminaMultiframe2VideoRequest request) {
-        DreaminaCliResult raw = multiframe2video(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+        return structuredPayloadMapper.mapGenerateSubmit(multiframe2video(request));
     }
 
     /**
      * {@link #multimodal2video(List)} 的结构化提交视图。
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> multimodal2VideoSubmit(List<String> additionalRawArgs) {
-        DreaminaCliResult raw = multimodal2video(additionalRawArgs);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> multimodal2VideoSubmit(List<String> additionalRawArgs) {
+        return structuredPayloadMapper.mapGenerateSubmit(multimodal2video(additionalRawArgs));
     }
 
     /**
@@ -1212,10 +1869,9 @@ public class DreaminaCliExecutor {
      * @param request 多模态视频请求
      * @return 原始快照与结构化提交结果
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> multimodal2VideoSubmit(
+    public DreaminaCliResponse<DreaminaGenerateSubmit> multimodal2VideoSubmit(
         DreaminaMultimodal2VideoRequest request) {
-        DreaminaCliResult raw = multimodal2video(request);
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+        return structuredPayloadMapper.mapGenerateSubmit(multimodal2video(request));
     }
 
     /**
@@ -1223,8 +1879,8 @@ public class DreaminaCliExecutor {
      *
      * @param raw 事先取得的 CLI 快照；不得为 null
      */
-    public DreaminaCliTypedResult<DreaminaGenerateSubmitResult> mapGenerateSubmitOnly(DreaminaCliResult raw) {
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapGenerateSubmit(raw));
+    public DreaminaCliResponse<DreaminaGenerateSubmit> mapGenerateSubmitOnly(DreaminaCliResult raw) {
+        return structuredPayloadMapper.mapGenerateSubmit(raw);
     }
 
     /**
@@ -1232,27 +1888,27 @@ public class DreaminaCliExecutor {
      *
      * @param raw 事先取得的 CLI 快照；不得为 null
      */
-    public DreaminaCliTypedResult<DreaminaQueryResult> mapQueryResultOnly(DreaminaCliResult raw) {
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapQueryResult(raw));
+    public DreaminaCliResponse<DreaminaQueryResult> mapQueryResultOnly(DreaminaCliResult raw) {
+        return structuredPayloadMapper.mapQueryResult(raw);
     }
 
     /**
-     * 通用：映射 {@link DreaminaTaskListResult}。
+     * 通用：映射 {@link List<DreaminaTaskItem>}。
      *
      * @param raw 事先取得的 CLI 快照；不得为 null
      */
-    public DreaminaCliTypedResult<DreaminaTaskListResult> mapTaskListOnly(DreaminaCliResult raw) {
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapTaskList(raw));
+    public DreaminaCliResponse<List<DreaminaTaskItem>> mapTaskListOnly(DreaminaCliResult raw) {
+        return structuredPayloadMapper.mapTaskList(raw);
     }
 
     /**
-     * 通用：映射 {@link DreaminaHelpResult}。
+     * 通用：映射 {@link DreaminaHelp}。
      *
      * @param topic 帮助主题；可为 null
      * @param raw   CLI 快照；不得为 null
      */
-    public DreaminaCliTypedResult<DreaminaHelpResult> mapHelpOnly(String topic, DreaminaCliResult raw) {
-        return DreaminaCliTypedResult.of(raw, structuredPayloadMapper.mapHelp(topic, raw));
+    public DreaminaCliResponse<DreaminaHelp> mapHelpOnly(String topic, DreaminaCliResult raw) {
+        return structuredPayloadMapper.mapHelp(topic, raw);
     }
 
     /**

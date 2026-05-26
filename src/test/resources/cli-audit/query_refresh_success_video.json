@@ -1,0 +1,25 @@
+{
+  "submit_id": "7045230a-b96f-4470-8212-b424a609782c",
+  "gen_status": "success",
+  "result_json": {
+    "images": [],
+    "videos": [
+      {
+        "video_url": "https://v6-artist.vlabvod.com/2323ef80f7e943f5075d0ec6c2492aff/6a15514f/video/tos/cn/tos-cn-v-148450/ogCKqeFNJsUg74ilElQghACksTsDC1JhQQAVIC/?a=4066",
+        "fps": 24,
+        "width": 960,
+        "height": 960,
+        "format": "mp4",
+        "duration": 3.208
+      }
+    ]
+  },
+  "credit_count": 6,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video3_fast_multi_frame_720p\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video3_fast_multi_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}
