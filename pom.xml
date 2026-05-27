@@ -6,7 +6,7 @@
 
     <groupId>io.github.hiwepy</groupId>
     <artifactId>dreamina-java-sdk</artifactId>
-    <version>4.0.x.20260527-SNAPSHOT</version>
+    <version>4.1.x.20260527-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Dreamina (即梦) official CLI integration SDK for Java — Spring Boot 4 line (JDK 17, SLF4J 2.x)</description>
