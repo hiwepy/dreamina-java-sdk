@@ -1,0 +1,140 @@
+=== CMD: dreamina list_task --limit 5 ===
+=== START: 2026-05-26T06:49:13Z ===
+=== END: 2026-05-26T06:49:13Z ===
+=== STDOUT (raw, untruncated) ===
+[
+  {
+    "submit_id": "fe6e2b86-b620-42ab-99ed-d235b6404b8d",
+    "gen_task_type": "text2image",
+    "gen_status": "querying",
+    "fail_reason": "",
+    "commerce_info": {
+      "credit_count": 3,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_2k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "c3c0774f-6715-4c0a-b044-f961acf38314",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 3520,
+          "height": 4693
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 0,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_uhd_4k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "4a5cd7cc-92f6-4ab3-a4b3-7e9ccfae790a",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 3520,
+          "height": 4693
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 4,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_4k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "aa5cd4a9-f224-494b-9e9e-755e4ec56b17",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 1,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_generate_plus"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "51a18430-d782-4243-b8c1-b7a573e7434e",
+    "prompt": "smoke",
+    "gen_task_type": "multimodal2video",
+    "gen_status": "fail",
+    "fail_reason": "api error: ret=1310, message=ExceedConcurrencyLimit, logid=202605221221461921680030314739678"
+  }
+]
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 2874 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

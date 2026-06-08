@@ -1,0 +1,8 @@
+=== CMD: dreamina query_result ===
+=== START: 2026-05-26T06:49:14Z ===
+=== END: 2026-05-26T06:49:14Z ===
+=== STDOUT (raw, untruncated) ===
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 0 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 1 ===

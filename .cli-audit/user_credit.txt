@@ -1,0 +1,9 @@
+=== CMD: dreamina user_credit ===
+{
+  "total_credit": 4385,
+  "user_id": 1552973852847448,
+  "user_name": "",
+  "vip_level": "maestro"
+}
+
+=== EXIT_CODE: 0 ===

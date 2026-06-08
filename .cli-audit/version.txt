@@ -1,0 +1,8 @@
+=== CMD: dreamina version ===
+{
+  "version": "c58a6a2-dirty",
+  "commit": "c58a6a2",
+  "build_time": "2026-05-07T09:52:59Z"
+}
+
+=== EXIT_CODE: 0 ===

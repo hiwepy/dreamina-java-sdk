@@ -1,0 +1,15 @@
+=== CMD: dreamina multimodal2video --image=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png --prompt=将画面转为电影感镜头 --duration=5 --ratio=1:1 --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:59Z ===
+=== END: 2026-05-26T06:50:01Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "fa8e95ea-ac2e-41fc-be21-ea78c96371c3",
+  "prompt": "将画面转为电影感镜头",
+  "logid": "20260526144959192168000098686341A",
+  "gen_status": "querying",
+  "credit_count": 70
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 202 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

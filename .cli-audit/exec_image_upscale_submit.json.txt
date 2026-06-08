@@ -1,0 +1,14 @@
+=== CMD: dreamina image_upscale --image=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png --resolution_type=2k --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:52Z ===
+=== END: 2026-05-26T06:49:54Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "1d6f7404-eb4e-45ce-854b-6bd027bae148",
+  "logid": "20260526144952192168000098633FD7A",
+  "gen_status": "querying",
+  "credit_count": 1
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 155 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

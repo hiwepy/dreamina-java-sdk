@@ -1,0 +1,22 @@
+=== CMD: dreamina query_result --submit_id=beefb889-845f-4dde-bdf7-c85db895d1c9 ===
+=== START: 2026-05-26T06:52:45Z ===
+=== END: 2026-05-26T06:52:45Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "beefb889-845f-4dde-bdf7-c85db895d1c9",
+  "prompt": "季节从夏到秋的变化",
+  "logid": "202605261449561921680000980034E40",
+  "gen_status": "querying",
+  "credit_count": 70,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Generating",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video40_pro_vision\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video40_Pro_Vision_end_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 672 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

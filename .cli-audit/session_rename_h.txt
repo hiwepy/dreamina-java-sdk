@@ -1,0 +1,28 @@
+=== CMD: dreamina session rename -h ===
+Usage:
+  dreamina session rename <session_id> <new_name> [flags]
+
+Rename a session.
+
+This command only exposes renaming. Pin/unpin is intentionally not exposed in CLI.
+
+Args:
+- session_id: the target session ID
+- new_name: the new session name (1-50 characters)
+
+Notes:
+- Session 0 is the default session and cannot be renamed.
+- Negative session IDs are invalid.
+
+
+
+Flags:
+  -h, --help   help for rename
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina session rename 10086 "2024年度宣传片"
+
+=== EXIT_CODE: 0 ===

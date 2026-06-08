@@ -1,0 +1,15 @@
+=== CMD: dreamina help help ===
+Usage:
+  dreamina help [command] [flags]
+
+Help provides help for any command in the application.
+Simply type dreamina help [path to command] for full details.
+
+
+Flags:
+  -h, --help   help for help
+
+Global Flags:
+      --version   print build version information
+
+=== EXIT_CODE: 0 ===

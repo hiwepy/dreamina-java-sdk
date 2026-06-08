@@ -1,0 +1,24 @@
+=== CMD: dreamina session rm -h ===
+Usage:
+  dreamina session delete <session_id> [flags]
+
+Delete a session.
+
+Notes:
+- Session 0 is the default session and cannot be deleted.
+- Negative session IDs are invalid.
+- This operation is safe. The backend performs a soft delete and will move related history records back to the default session.
+
+
+
+Flags:
+  -h, --help   help for delete
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina session delete 10085
+  dreamina session rm 10085
+
+=== EXIT_CODE: 0 ===

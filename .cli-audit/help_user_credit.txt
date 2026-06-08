@@ -1,0 +1,17 @@
+=== CMD: dreamina help user_credit ===
+Usage:
+  dreamina user_credit [flags]
+
+Query the current logged-in user's remaining Dreamina credits.
+
+
+Flags:
+  -h, --help   help for user_credit
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina user_credit
+
+=== EXIT_CODE: 0 ===

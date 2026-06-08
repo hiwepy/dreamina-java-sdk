@@ -1,0 +1,21 @@
+=== CMD: dreamina session find -h ===
+Usage:
+  dreamina session search <name> [flags]
+
+Search sessions by name.
+
+The CLI requests the first 100 sessions from the backend and matches records whose name contains the input string. Matching is case-sensitive.
+
+
+
+Flags:
+  -h, --help   help for search
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina session search "视频"
+  dreamina session search "我的年度总结"
+
+=== EXIT_CODE: 0 ===

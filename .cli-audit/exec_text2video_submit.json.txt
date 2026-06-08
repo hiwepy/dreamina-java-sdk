@@ -1,0 +1,14 @@
+=== CMD: dreamina text2video --prompt=一只橘猫在窗台上伸懒腰，小清新风格 --duration=5 --ratio=1:1 --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:49Z ===
+=== END: 2026-05-26T06:49:50Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "b15b3096-baa7-466d-b302-0bcc4e5590dd",
+  "logid": "20260526144949192168000098883920D",
+  "gen_status": "querying",
+  "credit_count": 25
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 156 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

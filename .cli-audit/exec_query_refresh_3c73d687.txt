@@ -1,0 +1,14 @@
+=== CMD: dreamina query_result --submit_id=3c73d687-be9a-4908-8fae-81b2a2e9718f ===
+=== START: 2026-05-26T06:52:43Z ===
+=== END: 2026-05-26T06:52:44Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "3c73d687-be9a-4908-8fae-81b2a2e9718f",
+  "prompt": "镜头缓慢推近，微风拂动窗帘",
+  "logid": "202605261449541921680000985219A49",
+  "gen_status": "querying"
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 189 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

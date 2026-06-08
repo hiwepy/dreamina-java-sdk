@@ -1,0 +1,21 @@
+=== CMD: dreamina help relogin ===
+Usage:
+  dreamina relogin [flags]
+
+Remove the local OAuth login state first, then force a fresh OAuth Device Flow login.
+By default the CLI prints verification_uri, user_code, and device_code, then waits for authorization to complete.
+With --headless, the CLI prints the authorization material and exits without polling checklogin.
+
+
+Flags:
+      --headless   print OAuth authorization material and exit without polling checklogin
+  -h, --help       help for relogin
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina relogin
+  dreamina relogin --headless
+
+=== EXIT_CODE: 0 ===

@@ -1,0 +1,3 @@
+=== CMD: dreamina image_upscale ===
+
+=== EXIT_CODE: 1 ===

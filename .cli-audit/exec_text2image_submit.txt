@@ -1,0 +1,10 @@
+=== CMD: dreamina text2image --prompt=一只猫 --ratio=1:1 --resolution_type=2k --poll=0 ===
+=== STDOUT ===
+{
+  "submit_id": "fe6e2b86-b620-42ab-99ed-d235b6404b8d",
+  "logid": "202605261445291921680000983061F94",
+  "gen_status": "querying",
+  "credit_count": 3
+}
+=== STDERR ===
+=== EXIT: 0 ===

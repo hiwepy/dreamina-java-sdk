@@ -1,0 +1,15 @@
+=== CMD: dreamina image2image --images=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png --prompt=转为水彩插画风格 --ratio=1:1 --resolution_type=2k --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:50Z ===
+=== END: 2026-05-26T06:49:52Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "ee6fa746-cfb3-4708-8de4-7ef87df9d957",
+  "prompt": "转为水彩插画风格",
+  "logid": "20260526144951192168000098004E3C9",
+  "gen_status": "querying",
+  "credit_count": 3
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 195 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

@@ -1,0 +1,33 @@
+=== CMD: dreamina text2image -h ===
+Usage:
+  dreamina text2image [flags]
+
+Submit a Dreamina text-to-image task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+
+Supported combinations:
+- model_version: 3.0, 3.1, 4.0, 4.1, 4.5, 4.6, 5.0
+- ratio: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+- 3.0/3.1 -> resolution_type 1k or 2k
+- 4.0/4.1/4.5/4.6/5.0 -> resolution_type 2k or 4k
+
+Notes:
+- omit --model_version to use the default model
+- omit --resolution_type to use the model default
+
+
+Flags:
+      --prompt string            generation prompt
+      --session int              session id (default 0 "默认对话") 
+      --ratio string             supported values: 21:9, 16:9, 3:2, 4:3, 1:1, 3:4, 2:3, 9:16
+      --resolution_type string   supported values by model: 3.0/3.1 -> 1k or 2k; 4.0/4.1/4.5/4.6/5.0 -> 2k or 4k; omit to use the model default
+      --model_version string     supported values: 3.0, 3.1, 4.0, 4.1, 4.5, 4.6, 5.0
+      --poll int                 submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+  -h, --help                     help for text2image
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina text2image --prompt="a cat portrait" --ratio=1:1 --resolution_type=2k
+
+=== EXIT_CODE: 0 ===

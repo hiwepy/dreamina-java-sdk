@@ -1,0 +1,26 @@
+=== CMD: dreamina help image_upscale ===
+Usage:
+  dreamina image_upscale [flags]
+
+Upload one local image, then submit a Dreamina image upscale task. The task is asynchronous, but --poll can wait briefly before falling back to query_result.
+
+Supported combinations:
+- resolution_type: 2k, 4k, 8k
+- 2k is available to non-VIP users
+- 4k and 8k require VIP
+
+
+Flags:
+      --image string             local input image path
+      --session int              session id (default 0 "默认对话") 
+      --resolution_type string   supported values: 2k, 4k, 8k; 4k and 8k require VIP
+      --poll int                 submit then poll query_result for up to N seconds at 1s intervals (0 disables polling)
+  -h, --help                     help for image_upscale
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina image_upscale --image=./input.png --resolution_type=4k
+
+=== EXIT_CODE: 0 ===

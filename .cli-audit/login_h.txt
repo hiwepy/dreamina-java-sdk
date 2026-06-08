@@ -1,0 +1,23 @@
+=== CMD: dreamina login -h ===
+Usage:
+  dreamina login [flags]
+
+Reuse the current local OAuth login state when it is still valid; otherwise start OAuth Device Flow.
+By default the CLI prints verification_uri, user_code, and device_code, then waits for authorization to complete.
+With --headless, the CLI prints the authorization material and exits without polling checklogin.
+The legacy browser callback and manual-import login flow are no longer used.
+
+
+Flags:
+      --headless   print OAuth authorization material and exit without polling checklogin
+  -h, --help       help for login
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina login
+  dreamina login --headless
+  dreamina login checklogin --device_code=<device_code> --poll=30
+
+=== EXIT_CODE: 0 ===

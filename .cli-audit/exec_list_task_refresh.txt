@@ -1,0 +1,257 @@
+=== CMD: dreamina list_task --limit 10 ===
+=== START: 2026-05-26T06:52:47Z ===
+=== END: 2026-05-26T06:52:47Z ===
+=== STDOUT (raw, untruncated) ===
+[
+  {
+    "submit_id": "fa8e95ea-ac2e-41fc-be21-ea78c96371c3",
+    "prompt": "将画面转为电影感镜头",
+    "gen_task_type": "multimodal2video",
+    "gen_status": "querying",
+    "fail_reason": "",
+    "commerce_info": {
+      "credit_count": 70,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_video",
+          "benefit_type": "seedance_20_pro_720p_output"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "fe6e2b86-b620-42ab-99ed-d235b6404b8d",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 2048,
+          "height": 2048
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 3,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_2k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "ee6fa746-cfb3-4708-8de4-7ef87df9d957",
+    "prompt": "转为水彩插画风格",
+    "gen_task_type": "image2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 2048,
+          "height": 2048
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 3,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_2k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "c3c0774f-6715-4c0a-b044-f961acf38314",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 3520,
+          "height": 4693
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 0,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_uhd_4k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "beefb889-845f-4dde-bdf7-c85db895d1c9",
+    "prompt": "季节从夏到秋的变化",
+    "gen_task_type": "frames2video",
+    "gen_status": "querying",
+    "fail_reason": "",
+    "commerce_info": {
+      "credit_count": 70,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_video",
+          "benefit_type": "seedance_20_pro_720p_output"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "b15b3096-baa7-466d-b302-0bcc4e5590dd",
+    "gen_task_type": "text2video",
+    "gen_status": "querying",
+    "fail_reason": "",
+    "commerce_info": {
+      "credit_count": 25,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_video",
+          "benefit_type": "dreamina_seedance_20_fast"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "7045230a-b96f-4470-8212-b424a609782c",
+    "gen_task_type": "multiframe2video",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [],
+      "videos": [
+        {
+          "fps": 24,
+          "width": 960,
+          "height": 960,
+          "format": "mp4",
+          "duration": 3.208
+        }
+      ]
+    },
+    "commerce_info": {
+      "credit_count": 6,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_video",
+          "benefit_type": "basic_video_operation_vgfm_v_three"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "3c73d687-be9a-4908-8fae-81b2a2e9718f",
+    "prompt": "镜头缓慢推近，微风拂动窗帘",
+    "gen_task_type": "image2video",
+    "gen_status": "querying",
+    "fail_reason": ""
+  },
+  {
+    "submit_id": "1d6f7404-eb4e-45ce-854b-6bd027bae148",
+    "gen_task_type": "image_upscale",
+    "gen_status": "querying",
+    "fail_reason": "",
+    "commerce_info": {
+      "credit_count": 1,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_pro_hd_vtwo_twok"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "262760ae-2694-439f-9258-7a1fb20c33d4",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 2048,
+          "height": 2048
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 3,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_2k"
+        }
+      ]
+    }
+  }
+]
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 5614 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

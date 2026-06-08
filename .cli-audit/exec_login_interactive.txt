@@ -1,0 +1,7 @@
+请使用浏览器完成 OAuth Device Flow 登录。
+verification_uri: https://jimeng.jianying.com/ai-tool/cli-auth?verification_uri=https%3A%2F%2Fjimeng.jianying.com%2Fpassport%2Fopen%2Fscan_user_code%2F%3Fuser_code%3D1e770913dbc75f4aae1930a344a97364
+user_code: 1e770913dbc75f4aae1930a344a97364
+device_code: bdd3081d943f2eaf30eda22fd429f016
+poll_interval: 1s
+expires_at: 2026-05-26T14:07:11+08:00
+登录已过期，请重新执行 dreamina login

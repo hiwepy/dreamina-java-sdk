@@ -1,0 +1,23 @@
+=== CMD: dreamina list_task -h ===
+Usage:
+  dreamina list_task [flags]
+
+List tasks saved for the current logged-in user.
+
+
+Flags:
+      --gen_status string      filter by gen_status
+      --gen_task_type string   filter by gen_task_type
+  -h, --help                   help for list_task
+      --limit int              max number of tasks to return (default 20)
+      --offset int             offset for pagination
+      --submit_id string       filter by submit_id
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina list_task
+  dreamina list_task --gen_status=success
+
+=== EXIT_CODE: 0 ===

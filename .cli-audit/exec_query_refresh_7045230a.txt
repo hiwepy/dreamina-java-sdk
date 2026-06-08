@@ -1,0 +1,33 @@
+=== CMD: dreamina query_result --submit_id=7045230a-b96f-4470-8212-b424a609782c ===
+=== START: 2026-05-26T06:52:44Z ===
+=== END: 2026-05-26T06:52:44Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "7045230a-b96f-4470-8212-b424a609782c",
+  "gen_status": "success",
+  "result_json": {
+    "images": [],
+    "videos": [
+      {
+        "video_url": "https://v6-artist.vlabvod.com/2323ef80f7e943f5075d0ec6c2492aff/6a15514f/video/tos/cn/tos-cn-v-148450/ogCKqeFNJsUg74ilElQghACksTsDC1JhQQAVIC/?a=4066&ch=0&cr=0&dr=0&er=0&cd=0%7C0%7C0%7C0&br=5255&bt=5255&cs=0&ds=12&ft=5QYTUxhhe6BMyqKLW.eJD12Nzj&mime_type=video_mp4&qs=0&rc=NTo1MzVnNmY3ZzhkaDk4O0BpajhrMzVrb2puOzczNDM7M0BhYGJeXzQzNi8xNi8xLzUxYSNmNmgtcWdmMl5hLS1kNDBzcw%3D%3D&btag=40000e00008000&dy_q=1779778364&feature_id=04b16e464b574158bb99cac30ccb1f5e&l=20260526145244192168000098067C202",
+        "fps": 24,
+        "width": 960,
+        "height": 960,
+        "format": "mp4",
+        "duration": 3.208
+      }
+    ]
+  },
+  "credit_count": 6,
+  "queue_info": {
+    "queue_idx": 0,
+    "priority": 1,
+    "queue_status": "Finish",
+    "queue_length": 0,
+    "debug_info": "{\"have_no_dreamina_queue_name\":false,\"dreamina_matrix_queue_name\":\"dreamina_fusion_video3_fast_multi_frame_720p\",\"dreamina_matrix_req_key\":\"DreaminaFusion:Video3_fast_multi_frame_720p\",\"dreamina_matrix_second_req_key\":\"\",\"have_no_queue_name\":true,\"queue_name\":\"\",\"matrix_req_key\":\"\",\"matrix_second_req_key\":\"\"}"
+  }
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 1286 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

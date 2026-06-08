@@ -1,0 +1,15 @@
+=== CMD: dreamina frames2video --first=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png --last=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample-b.png --prompt=季节从夏到秋的变化 --duration=5 --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:55Z ===
+=== END: 2026-05-26T06:49:57Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "beefb889-845f-4dde-bdf7-c85db895d1c9",
+  "prompt": "季节从夏到秋的变化",
+  "logid": "202605261449561921680000980034E40",
+  "gen_status": "querying",
+  "credit_count": 70
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 199 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

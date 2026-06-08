@@ -1,0 +1,14 @@
+=== CMD: dreamina multiframe2video --images=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png,/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample-b.png --prompt=角色从左侧转向右侧 --duration=3 --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:57Z ===
+=== END: 2026-05-26T06:49:59Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "7045230a-b96f-4470-8212-b424a609782c",
+  "logid": "2026052614495719216800009888276FF",
+  "gen_status": "querying",
+  "credit_count": 6
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 155 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

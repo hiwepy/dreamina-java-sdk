@@ -1,0 +1,3 @@
+=== CMD: dreamina multiframe2video ===
+
+=== EXIT_CODE: 1 ===

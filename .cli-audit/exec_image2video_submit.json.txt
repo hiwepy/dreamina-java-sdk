@@ -1,0 +1,15 @@
+=== CMD: dreamina image2video --image=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png --prompt=镜头缓慢推近，微风拂动窗帘 --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:54Z ===
+=== END: 2026-05-26T06:49:55Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "3c73d687-be9a-4908-8fae-81b2a2e9718f",
+  "prompt": "镜头缓慢推近，微风拂动窗帘",
+  "logid": "202605261449541921680000985219A49",
+  "gen_status": "fail",
+  "fail_reason": "api error: ret=1015, message=login error, logid=202605261449541921680000985219A49"
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 287 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

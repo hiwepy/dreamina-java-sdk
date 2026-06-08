@@ -1,0 +1,112 @@
+=== CMD: dreamina list_task --limit 3 --gen_status success ===
+=== START: 2026-05-26T06:49:13Z ===
+=== END: 2026-05-26T06:49:13Z ===
+=== STDOUT (raw, untruncated) ===
+[
+  {
+    "submit_id": "c3c0774f-6715-4c0a-b044-f961acf38314",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 3520,
+          "height": 4693
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 0,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_uhd_4k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "4a5cd7cc-92f6-4ab3-a4b3-7e9ccfae790a",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 3520,
+          "height": 4693
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 4,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_v5_4k"
+        }
+      ]
+    }
+  },
+  {
+    "submit_id": "aa5cd4a9-f224-494b-9e9e-755e4ec56b17",
+    "gen_task_type": "text2image",
+    "gen_status": "success",
+    "fail_reason": "",
+    "result_json": {
+      "images": [
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        },
+        {
+          "width": 1328,
+          "height": 1328
+        }
+      ],
+      "videos": []
+    },
+    "commerce_info": {
+      "credit_count": 1,
+      "triplet": {
+        "resource_type": "",
+        "resource_id": "",
+        "benefit_type": ""
+      },
+      "triplets": [
+        {
+          "resource_type": "aigc",
+          "resource_id": "generate_img",
+          "benefit_type": "image_basic_generate_plus"
+        }
+      ]
+    }
+  }
+]
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 2115 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

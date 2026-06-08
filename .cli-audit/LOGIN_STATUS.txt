@@ -1,0 +1,14 @@
+audit_time=2026-05-26T06:50:04Z
+dreamina=dreamina
+home=/Users/wandl
+user_credit_probe=logged_in
+poll_enabled=1
+poll_max_sec=120
+prompt_text2image=一只橘猫坐在窗台上，小清新插画
+note=audit skips logout/relogin/login; Cursor/agent shells may lack macOS keyring (secret not found in keyring)
+audit_submit_id=c3c0774f-6715-4c0a-b044-f961acf38314
+audit_text2image_submit_id=262760ae-2694-439f-9258-7a1fb20c33d4
+audit_text2video_submit_id=b15b3096-baa7-466d-b302-0bcc4e5590dd
+audit_new_submit_id=262760ae-2694-439f-9258-7a1fb20c33d4
+audit_post_query_submit_id=262760ae-2694-439f-9258-7a1fb20c33d4
+audit_sample_image=/Users/wandl/workspaces/workspace-ddd4j/workspace-ddd4j-boot-starters/dreamina-java-sdk/scripts/fixtures/audit-sample.png

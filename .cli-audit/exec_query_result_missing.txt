@@ -1,0 +1,11 @@
+=== CMD: dreamina query_result --submit_id=00000000-0000-0000-0000-000000000000 ===
+=== START: 2026-05-26T06:49:14Z ===
+=== END: 2026-05-26T06:49:14Z ===
+=== STDOUT (raw, untruncated) ===
+
+2026/05/26 14:49:14 [31;1mcode.byted.org/videocut-aigc/dreamina_cli/components/task/store.go:278 [35;1mrecord not found
+[0m[33m[0.254ms] [34;1m[rows:0][0m SELECT * FROM `aigc_task` WHERE submit_id = "00000000-0000-0000-0000-000000000000" ORDER BY `aigc_task`.`submit_id` LIMIT 1
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 287 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 1 ===

@@ -1,0 +1,52 @@
+=== CMD: dreamina session ===
+=== START: 2026-05-26T06:49:13Z ===
+=== END: 2026-05-26T06:49:13Z ===
+=== STDOUT (raw, untruncated) ===
+Usage:
+  dreamina session [flags]
+
+Manage Dreamina sessions (create, list, search, rename, delete).
+
+A session is a container for organizing your creation history.
+All generator commands accept a --session=<id> flag to submit tasks into a specific session.
+
+Available Commands:
+  create    Create a new session (auto-named or custom)
+  list      List your recent sessions (alias: ls)
+  search    Find a session ID by its name (alias: find)
+  rename    Change a session's name (alias: update)
+  delete    Delete a session (alias: rm)
+
+Notes:
+- All session commands require login (run "dreamina login" first).
+- Session 0 is the default session. It cannot be renamed or deleted.
+- Deleting a session will safely move its history back to the default session.
+
+
+Flags:
+  -h, --help   help for session
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  # 1. Create a session
+  dreamina session create
+  dreamina session create "My Video Project"
+
+  # 2. List sessions (default 30; user-specified -n is capped at 100)
+  dreamina session list
+  dreamina session ls -n 100
+
+  # 3. Find a session by name
+  dreamina session search "Video"
+
+  # 4. Rename a session
+  dreamina session rename 10086 "New Project Name"
+
+  # 5. Delete a session
+  dreamina session rm 10086
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 1286 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

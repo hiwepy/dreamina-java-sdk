@@ -1,0 +1,4 @@
+=== CMD: dreamina logout ===
+当前没有本地登录态。
+
+=== EXIT_CODE: 0 ===

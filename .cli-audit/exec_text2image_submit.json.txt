@@ -1,0 +1,14 @@
+=== CMD: dreamina text2image --prompt=一只橘猫坐在窗台上，小清新插画 --ratio=1:1 --resolution_type=2k --session=0 --poll=0 ===
+=== START: 2026-05-26T06:49:15Z ===
+=== END: 2026-05-26T06:49:16Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "submit_id": "262760ae-2694-439f-9258-7a1fb20c33d4",
+  "logid": "20260526144915192168000098601109F",
+  "gen_status": "querying",
+  "credit_count": 3
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 155 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

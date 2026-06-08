@@ -1,0 +1,17 @@
+=== CMD: dreamina help version ===
+Usage:
+  dreamina version [flags]
+
+Print build version and commit information
+
+
+Flags:
+  -h, --help   help for version
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina version
+
+=== EXIT_CODE: 0 ===

@@ -1,0 +1,25 @@
+=== CMD: dreamina session create -h ===
+Usage:
+  dreamina session create [name] [flags]
+
+Create a new session.
+
+Args:
+- name (optional): session name. If omitted, the backend generates a default name like "新对话 01-04 10:30".
+
+Notes:
+- name must be 1-50 characters after trimming spaces.
+
+
+
+Flags:
+  -h, --help   help for create
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina session create
+  dreamina session create "我的视频项目"
+
+=== EXIT_CODE: 0 ===

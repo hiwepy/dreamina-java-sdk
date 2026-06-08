@@ -1,0 +1,12 @@
+=== CMD: dreamina session search default ===
+=== START: 2026-05-26T06:49:14Z ===
+=== END: 2026-05-26T06:49:14Z ===
+=== STDOUT (raw, untruncated) ===
+Found 1 sessions containing "default":
+ID  NAME     UPDATED_AT
+--  -------  ----------------
+0   default  2026-05-18 11:10
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 123 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===

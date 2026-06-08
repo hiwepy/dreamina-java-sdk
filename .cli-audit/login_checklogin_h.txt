@@ -1,0 +1,22 @@
+=== CMD: dreamina login checklogin -h ===
+Usage:
+  dreamina login checklogin [flags]
+
+Check the authorization result for a prior headless OAuth Device Flow login.
+Pass the device_code printed by "dreamina login --headless" or "dreamina relogin --headless".
+--poll=N waits for up to N seconds; --poll=0 checks only once.
+
+
+Flags:
+      --device_code string   device code printed by a prior headless OAuth login
+  -h, --help                 help for checklogin
+      --poll int             wait for up to N seconds before timing out; 0 checks once
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina login checklogin --device_code=<device_code>
+  dreamina login checklogin --device_code=<device_code> --poll=30
+
+=== EXIT_CODE: 0 ===

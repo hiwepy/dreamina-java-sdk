@@ -1,0 +1,8 @@
+=== CMD: dreamina image2image ===
+=== START: 2026-05-26T06:50:01Z ===
+=== END: 2026-05-26T06:50:01Z ===
+=== STDOUT (raw, untruncated) ===
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 0 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 1 ===

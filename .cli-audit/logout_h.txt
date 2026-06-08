@@ -1,0 +1,17 @@
+=== CMD: dreamina logout -h ===
+Usage:
+  dreamina logout [flags]
+
+Remove the local OAuth login state without touching tasks or config.
+
+
+Flags:
+  -h, --help   help for logout
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina logout
+
+=== EXIT_CODE: 0 ===

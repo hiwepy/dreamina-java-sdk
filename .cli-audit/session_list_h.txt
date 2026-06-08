@@ -1,0 +1,29 @@
+=== CMD: dreamina session list -h ===
+Usage:
+  dreamina session list [flags]
+
+List recent sessions.
+
+By default it requests and shows the latest 30 sessions from the backend, ordered by pinned first and then updated time descending.
+If you pass -n/--max-count, the CLI requests that many sessions from the backend.
+User-specified values are capped at 100.
+
+Output:
+- Table columns: ID, NAME, PINNED, UPDATED_AT
+- UPDATED_AT is formatted as local time: YYYY-MM-DD HH:MM
+
+
+
+Flags:
+  -h, --help            help for list
+  -n, --max-count int   maximum number of sessions to display (default 30)
+
+Global Flags:
+      --version   print build version information
+
+Examples:
+  dreamina session list
+  dreamina session list -n 5
+  dreamina session list -n 100
+
+=== EXIT_CODE: 0 ===

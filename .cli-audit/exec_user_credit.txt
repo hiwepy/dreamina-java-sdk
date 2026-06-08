@@ -1,0 +1,14 @@
+=== CMD: dreamina user_credit ===
+=== START: 2026-05-26T06:49:13Z ===
+=== END: 2026-05-26T06:49:13Z ===
+=== STDOUT (raw, untruncated) ===
+{
+  "total_credit": 4385,
+  "user_id": 1552973852847448,
+  "user_name": "",
+  "vip_level": "maestro"
+}
+=== STDERR (raw, untruncated) ===
+=== STDOUT_BYTES: 103 ===
+=== STDERR_BYTES: 0 ===
+=== EXIT: 0 ===
